@@ -702,7 +702,13 @@ pub async fn import_existing_skill(
 ) -> Result<InstallResultDto, String> {
     let store = store.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
-        let result = install_local_skill(&app, &store, sourcePath.as_ref(), name)?;
+        let source = std::path::Path::new(&sourcePath);
+        // Validate SKILL.md exists before importing (fixes #8: prevents importing
+        // directories that were "discovered" but lack a valid SKILL.md).
+        if !source.join("SKILL.md").exists() {
+            anyhow::bail!("SKILL_INVALID|missing_skill_md");
+        }
+        let result = install_local_skill(&app, &store, source, name)?;
         Ok::<_, anyhow::Error>(to_install_dto(result))
     })
     .await

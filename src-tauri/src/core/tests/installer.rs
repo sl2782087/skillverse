@@ -431,3 +431,86 @@ fn install_git_skill_derives_name_from_skill_md() {
     assert_eq!(res.name, "proper-name");
     assert!(res.central_path.ends_with("proper-name"));
 }
+
+/// Issue #18: repos with skills in root-level subdirectories (no `skills/` parent)
+/// should be detected as multi-skill repos.
+#[test]
+fn install_git_skill_detects_root_level_multi_skills() {
+    let app = tauri::test::mock_app();
+    let (_dir, store) = make_store();
+    let central_root = tempfile::tempdir().unwrap();
+    set_central_path(&store, central_root.path());
+
+    // Build a repo with skills directly in root subdirectories (no skills/ parent)
+    let repo_dir = tempfile::tempdir().unwrap();
+    fs::create_dir_all(repo_dir.path().join("skill-a")).unwrap();
+    fs::create_dir_all(repo_dir.path().join("skill-b")).unwrap();
+    fs::write(
+        repo_dir.path().join("skill-a/SKILL.md"),
+        "---\nname: Skill A\n---\n",
+    )
+    .unwrap();
+    fs::write(
+        repo_dir.path().join("skill-b/SKILL.md"),
+        "---\nname: Skill B\n---\n",
+    )
+    .unwrap();
+    let repo = init_git_repo(repo_dir.path());
+    commit_all(&repo, "add root-level skills");
+
+    // install_git_skill should detect multiple skills and bail with MULTI_SKILLS
+    let err = match super::install_git_skill(
+        app.handle(),
+        &store,
+        repo_dir.path().to_string_lossy().as_ref(),
+        None,
+        None,
+    ) {
+        Ok(_) => panic!("expected MULTI_SKILLS error"),
+        Err(e) => e,
+    };
+    assert!(format!("{:#}", err).contains("MULTI_SKILLS|"));
+}
+
+/// Issue #18: list_git_skills should discover skills in root-level subdirectories.
+#[test]
+fn list_git_skills_finds_root_level_skills() {
+    let app = tauri::test::mock_app();
+    let (_dir, store) = make_store();
+    let central_root = tempfile::tempdir().unwrap();
+    set_central_path(&store, central_root.path());
+
+    let repo_dir = tempfile::tempdir().unwrap();
+    fs::create_dir_all(repo_dir.path().join("my-skill-1")).unwrap();
+    fs::create_dir_all(repo_dir.path().join("my-skill-2")).unwrap();
+    fs::create_dir_all(repo_dir.path().join("not-a-skill")).unwrap();
+    fs::write(
+        repo_dir.path().join("my-skill-1/SKILL.md"),
+        "---\nname: First\n---\n",
+    )
+    .unwrap();
+    fs::write(
+        repo_dir.path().join("my-skill-2/SKILL.md"),
+        "---\nname: Second\n---\n",
+    )
+    .unwrap();
+    // not-a-skill has no SKILL.md — should NOT be discovered
+    let repo = init_git_repo(repo_dir.path());
+    commit_all(&repo, "add root-level skills");
+
+    let candidates = super::list_git_skills(
+        app.handle(),
+        &store,
+        repo_dir.path().to_string_lossy().as_ref(),
+    )
+    .unwrap();
+
+    let names: Vec<String> = candidates.iter().map(|c| c.name.clone()).collect();
+    assert!(names.contains(&"First".to_string()), "should find First");
+    assert!(names.contains(&"Second".to_string()), "should find Second");
+    // "not-a-skill" should NOT appear
+    assert!(
+        !candidates.iter().any(|c| c.subpath.contains("not-a-skill")),
+        "should not find not-a-skill"
+    );
+}

@@ -201,23 +201,12 @@ pub fn install_git_skill<R: tauri::Runtime>(
             }
             sub_src
         } else {
-            // Repo root URL: if it looks like a multi-skill repo, ask user to provide a folder URL.
-            let skills_dir = repo_dir.join("skills");
-            if skills_dir.exists() {
-                let mut count = 0usize;
-                if let Ok(rd) = std::fs::read_dir(&skills_dir) {
-                    for entry in rd.flatten() {
-                        let p = entry.path();
-                        if p.is_dir() && p.join("SKILL.md").exists() {
-                            count += 1;
-                        }
-                    }
-                }
-                if count >= 2 {
-                    anyhow::bail!(
-              "MULTI_SKILLS|该仓库包含多个 Skills，请复制具体 Skill 文件夹链接（例如 GitHub 的 /tree/<branch>/skills/<name>），再导入。"
-            );
-                }
+            // Repo root URL: detect multi-skill repos and ask user to pick one.
+            let skill_count = count_skills_in_repo(&repo_dir);
+            if skill_count >= 2 {
+                anyhow::bail!(
+                    "MULTI_SKILLS|该仓库包含多个 Skills，请复制具体 Skill 文件夹链接（例如 GitHub 的 /tree/<branch>/<skill-folder>），再导入。"
+                );
             }
             repo_dir.clone()
         };
@@ -421,6 +410,47 @@ fn derive_name_from_repo_url(repo_url: &str) -> String {
     } else {
         name
     }
+}
+
+/// Count skill directories in a repo: checks both `skills/*` and root-level subdirectories.
+fn count_skills_in_repo(repo_dir: &Path) -> usize {
+    let mut count = 0usize;
+    // 1) skills/* and known sub-locations
+    for base in [
+        "skills",
+        "skills/.curated",
+        "skills/.experimental",
+        "skills/.system",
+    ] {
+        let base_dir = repo_dir.join(base);
+        if let Ok(rd) = std::fs::read_dir(&base_dir) {
+            for entry in rd.flatten() {
+                let p = entry.path();
+                if p.is_dir() && p.join("SKILL.md").exists() {
+                    count += 1;
+                }
+            }
+        }
+    }
+    // 2) Root-level subdirectories (fixes #18: repos that put skills directly at root)
+    if let Ok(rd) = std::fs::read_dir(repo_dir) {
+        for entry in rd.flatten() {
+            let p = entry.path();
+            if !p.is_dir() {
+                continue;
+            }
+            let dir_name = entry.file_name();
+            let dir_name = dir_name.to_string_lossy();
+            // Skip dirs already covered above, hidden dirs, and common non-skill dirs
+            if dir_name == "skills" || dir_name.starts_with('.') {
+                continue;
+            }
+            if p.join("SKILL.md").exists() {
+                count += 1;
+            }
+        }
+    }
+    count
 }
 
 fn compute_content_hash(path: &Path) -> Option<String> {
@@ -659,19 +689,56 @@ pub fn list_git_skills<R: tauri::Runtime>(
         });
     }
 
-    // Standard discovery locations (subset aligned with add-skill):
-    // skills/*, skills/.curated/*, skills/.experimental/*, skills/.system/*
-    for base in [
+    // Scan known sub-locations: skills/*, skills/.curated/*, etc.
+    // AND root-level subdirectories (fixes #18: repos without a skills/ parent).
+    let scan_bases: Vec<std::path::PathBuf> = [
         "skills",
         "skills/.curated",
         "skills/.experimental",
         "skills/.system",
-    ] {
-        let base_dir = repo_dir.join(base);
-        if !base_dir.exists() {
-            continue;
+    ]
+    .iter()
+    .map(|b| repo_dir.join(b))
+    .collect();
+
+    // Collect all directories to scan: known bases + root-level subdirs
+    let mut dirs_to_scan: Vec<std::path::PathBuf> = Vec::new();
+    for base_dir in &scan_bases {
+        if base_dir.exists() {
+            dirs_to_scan.push(base_dir.clone());
         }
-        if let Ok(rd) = std::fs::read_dir(&base_dir) {
+    }
+    // Root-level subdirectories (skip "skills" and hidden dirs to avoid double-counting)
+    if let Ok(rd) = std::fs::read_dir(&repo_dir) {
+        for entry in rd.flatten() {
+            let p = entry.path();
+            if !p.is_dir() {
+                continue;
+            }
+            let dir_name = entry.file_name();
+            let dir_name = dir_name.to_string_lossy();
+            if dir_name == "skills" || dir_name.starts_with('.') {
+                continue;
+            }
+            if p.join("SKILL.md").exists() {
+                let (name, desc) =
+                    parse_skill_md(&p.join("SKILL.md")).unwrap_or((dir_name.to_string(), None));
+                let rel = p
+                    .strip_prefix(&repo_dir)
+                    .unwrap_or(&p)
+                    .to_string_lossy()
+                    .to_string();
+                out.push(GitSkillCandidate {
+                    name,
+                    description: desc,
+                    subpath: rel,
+                });
+            }
+        }
+    }
+
+    for base_dir in &dirs_to_scan {
+        if let Ok(rd) = std::fs::read_dir(base_dir) {
             for entry in rd.flatten() {
                 let p = entry.path();
                 if !p.is_dir() {
