@@ -6,13 +6,25 @@
 
 ## 主要功能
 
-- 统一视图：查看 Hub 托管的 skills 及其在各工具的生效状态
-- 迁移接管：扫描本机工具目录已有 skills，导入到中心仓库并可一键同步
-- 多来源导入：本地目录 / Git 仓库 URL（含 multi-skill 候选选择）
-- 更新：从原来源更新中心仓库内容，并回灌 copy 模式的目标
-- 新工具检测：发现新安装工具时提示是否同步所有已托管 skills
+- **Explore 探索页**：独立页面浏览精选技能推荐（ClawHub 每日更新）和在线搜索（skills.sh），一键安装并同步到所有已检测工具
+- **技能详情页**：点击技能名称查看完整文件内容，支持文件树浏览、Markdown 渲染和代码语法高亮（40+ 语言）
+- **统一视图**：查看 Hub 托管的 skills 及其在各工具的生效状态
+- **迁移接管**：扫描本机工具目录已有 skills，导入到中心仓库并可一键同步
+- **多来源导入**：本地目录 / Git 仓库 URL（含 multi-skill 候选选择、`.claude/skills/` 目录格式支持）
+- **更新**：从原来源更新中心仓库内容，并回灌 copy 模式的目标
+- **新工具检测**：发现新安装工具时提示是否同步所有已托管 skills
 
-![Skills Hub](./assets/home-example.png)
+### My Skills — 技能管理列表
+![My Skills](./assets/my-skills.png)
+
+### Explore — 探索与在线搜索
+![Explore](./assets/explore-search.png)
+
+### Manual Add — 手动添加技能
+![Manual Add](./assets/manual-add.png)
+
+### Skill Detail — 技能详情与文件浏览
+![Skill Detail](./assets/skill-detail.png)
 
 ## 支持的 AI 编程工具
 

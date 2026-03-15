@@ -14,13 +14,25 @@ Design docs:
 
 ## Key Features
 
-- Unified view: managed skills and per-tool activation status
-- Onboarding migration: scan existing skills in installed tools, import into the Central Repo, and sync
-- Import sources: local folder / Git URL (including multi-skill repo selection)
-- Update: refresh from source; propagate updates to copy-mode targets
-- New tool detection: detect newly installed tools and prompt to sync managed skills
+- **Explore page**: Browse featured skills (ClawHub, updated daily) and search online (skills.sh) — one-click install & sync to all detected tools
+- **Skill detail view**: Click a skill name to browse its files with Markdown rendering and syntax highlighting (40+ languages)
+- **Unified view**: Managed skills and per-tool activation status
+- **Onboarding migration**: Scan existing skills in installed tools, import into the Central Repo, and sync
+- **Import sources**: Local folder / Git URL (including multi-skill repo selection, `.claude/skills/` directory support)
+- **Update**: Refresh from source; propagate updates to copy-mode targets
+- **New tool detection**: Detect newly installed tools and prompt to sync managed skills
 
-![Skills Hub](docs/assets/home-example.png)
+### My Skills
+![My Skills](docs/assets/my-skills.png)
+
+### Explore & Search
+![Explore](docs/assets/explore-search.png)
+
+### Manual Add
+![Manual Add](docs/assets/manual-add.png)
+
+### Skill Detail
+![Skill Detail](docs/assets/skill-detail.png)
 
 ## Supported AI Coding Tools
 
