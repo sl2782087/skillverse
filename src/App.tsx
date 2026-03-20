@@ -109,12 +109,12 @@ function App() {
   const invokeTauri = useCallback(
     async <T,>(command: string, args?: Record<string, unknown>) => {
       if (!isTauri) {
-        throw new Error(t('errors.notTauri'))
+        throw new Error('Tauri API is not available')
       }
       const { invoke } = await import('@tauri-apps/api/core')
       return invoke<T>(command, args)
     },
-    [isTauri, t],
+    [isTauri],
   )
   const formatErrorMessage = useCallback(
     (raw: string) => {
