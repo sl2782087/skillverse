@@ -241,6 +241,173 @@ pub fn copy_dir_recursive(source: &Path, target: &Path) -> Result<()> {
     Ok(())
 }
 
+const MAX_LOCAL_SYMLINK_DEPTH: u32 = 64;
+
+/// Copy a directory tree into `target`, resolving in-repo symlinks to plain files/dirs.
+/// Only symlink targets under `repo_root` are allowed.
+pub fn copy_dir_recursive_materialize_symlinks(
+    source: &Path,
+    target: &Path,
+    repo_root: &Path,
+) -> Result<()> {
+    let root_canon = repo_root
+        .canonicalize()
+        .with_context(|| format!("canonicalize repo root {:?}", repo_root))?;
+    copy_dir_recursive_materialize_inner(source, target, &root_canon, 0)
+}
+
+fn copy_dir_recursive_materialize_inner(
+    source: &Path,
+    target: &Path,
+    root_canon: &Path,
+    symlink_depth: u32,
+) -> Result<()> {
+    if symlink_depth > MAX_LOCAL_SYMLINK_DEPTH {
+        anyhow::bail!(
+            "local symlink materialization depth exceeded (max {}) under {:?}",
+            MAX_LOCAL_SYMLINK_DEPTH,
+            source
+        );
+    }
+
+    for entry in walkdir::WalkDir::new(source)
+        .follow_links(false)
+        .into_iter()
+        .filter_entry(|entry| !should_skip_copy(entry))
+    {
+        let entry = entry?;
+        if should_skip_copy(&entry) {
+            continue;
+        }
+        let relative = entry.path().strip_prefix(source)?;
+        let target_path = target.join(relative);
+        let ft = entry.file_type();
+
+        if ft.is_dir() {
+            std::fs::create_dir_all(&target_path)
+                .with_context(|| format!("create dir {:?}", target_path))?;
+        } else if ft.is_file() {
+            // Some git clients (or configs like core.symlinks=false) materialize symlink blobs
+            // as tiny text files containing a relative path. Detect and materialize them.
+            if let Some(pointer_target) = resolve_pointer_file_target(entry.path(), root_canon)
+                .with_context(|| format!("resolve pointer-like symlink file {:?}", entry.path()))?
+            {
+                let pointer_meta = std::fs::symlink_metadata(&pointer_target)
+                    .with_context(|| format!("stat pointer target {:?}", pointer_target))?;
+                if pointer_meta.is_dir() {
+                    std::fs::create_dir_all(&target_path)
+                        .with_context(|| format!("create dir {:?}", target_path))?;
+                    copy_dir_recursive_materialize_inner(
+                        &pointer_target,
+                        &target_path,
+                        root_canon,
+                        symlink_depth + 1,
+                    )?;
+                } else {
+                    if let Some(parent) = target_path.parent() {
+                        std::fs::create_dir_all(parent)?;
+                    }
+                    std::fs::copy(&pointer_target, &target_path).with_context(|| {
+                        format!(
+                            "copy pointer target {:?} -> {:?}",
+                            pointer_target, target_path
+                        )
+                    })?;
+                }
+            } else {
+                if let Some(parent) = target_path.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                std::fs::copy(entry.path(), &target_path).with_context(|| {
+                    format!("copy file {:?} -> {:?}", entry.path(), target_path)
+                })?;
+            }
+        } else if ft.is_symlink() {
+            let link_target = std::fs::read_link(entry.path())
+                .with_context(|| format!("read_link {:?}", entry.path()))?;
+            let resolved = entry.path().parent().unwrap_or(source).join(&link_target);
+            let resolved_canon = resolved.canonicalize().with_context(|| {
+                format!(
+                    "canonicalize symlink target {:?} (from {:?})",
+                    resolved,
+                    entry.path()
+                )
+            })?;
+
+            if !resolved_canon.starts_with(root_canon) {
+                anyhow::bail!(
+                    "symlink {:?} resolves outside repository root: {:?}",
+                    entry.path(),
+                    resolved_canon
+                );
+            }
+
+            let meta = std::fs::symlink_metadata(&resolved_canon)
+                .with_context(|| format!("stat {:?}", resolved_canon))?;
+            if meta.is_dir() {
+                std::fs::create_dir_all(&target_path)
+                    .with_context(|| format!("create dir {:?}", target_path))?;
+                copy_dir_recursive_materialize_inner(
+                    &resolved_canon,
+                    &target_path,
+                    root_canon,
+                    symlink_depth + 1,
+                )?;
+            } else {
+                if let Some(parent) = target_path.parent() {
+                    std::fs::create_dir_all(parent)?;
+                }
+                std::fs::copy(&resolved_canon, &target_path).with_context(|| {
+                    format!(
+                        "copy symlink target {:?} -> {:?}",
+                        resolved_canon, target_path
+                    )
+                })?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn resolve_pointer_file_target(file_path: &Path, root_canon: &Path) -> Result<Option<PathBuf>> {
+    const MAX_POINTER_LEN: u64 = 512;
+    let meta = std::fs::metadata(file_path).with_context(|| format!("stat {:?}", file_path))?;
+    if meta.len() == 0 || meta.len() > MAX_POINTER_LEN {
+        return Ok(None);
+    }
+    let raw = std::fs::read_to_string(file_path)
+        .with_context(|| format!("read pointer-like file {:?}", file_path))?;
+    let trimmed = raw.trim();
+    if trimmed.is_empty() || (!trimmed.starts_with("./") && !trimmed.starts_with("../")) {
+        return Ok(None);
+    }
+    if trimmed.contains('\0') || trimmed.contains('\n') || trimmed.contains('\r') {
+        return Ok(None);
+    }
+    if !trimmed
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-' | '/'))
+    {
+        return Ok(None);
+    }
+    let resolved = file_path.parent().unwrap_or(root_canon).join(trimmed);
+    let canon = match resolved.canonicalize() {
+        Ok(v) => v,
+        Err(_) => return Ok(None),
+    };
+    if !canon.starts_with(root_canon) {
+        anyhow::bail!(
+            "pointer file {:?} resolves outside repo: {:?}",
+            file_path,
+            canon
+        );
+    }
+    if !canon.exists() {
+        return Ok(None);
+    }
+    Ok(Some(canon))
+}
+
 #[cfg(test)]
 #[path = "tests/sync_engine.rs"]
 mod tests;

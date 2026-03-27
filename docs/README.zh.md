@@ -13,6 +13,7 @@
 - **多来源导入**：本地目录 / Git 仓库 URL（含 multi-skill 候选选择、`.claude/skills/` 目录格式支持）
 - **更新**：从原来源更新中心仓库内容，并回灌 copy 模式的目标
 - **新工具检测**：发现新安装工具时提示是否同步所有已托管 skills
+- **原生菜单快捷入口**：可从顶部应用菜单（`功能`）或托盘菜单打开 Skills 存储路径，且文案支持中英实时切换
 
 ### My Skills — 技能管理列表
 ![My Skills](./assets/my-skills.png)
@@ -117,7 +118,7 @@ cargo test
 
 ## FAQ / 备注
 
-- Skill 存在哪里？中心仓库（Central Repo）默认是 `~/.skillshub`，可在设置里修改。
+- Skill 存在哪里？Skills 存储路径默认是 `~/.skillshub`，可在设置里修改，也可通过顶部应用菜单（`功能`）或托盘菜单快速打开。
 - Cursor 为什么强制 Copy？Cursor 当前不支持软链（symlink/junction）形式的技能目录，因此同步到 Cursor 时会固定使用目录复制（copy）。
 - 为什么有时会变成 Copy？默认优先 symlink/junction，但在某些系统（尤其 Windows）可能因为权限/策略导致无法创建链接，会自动回退到目录复制。
 - `TARGET_EXISTS|...` 是什么意思？目标目录已存在且默认不覆盖（为了安全）。你需要先清理目标目录，或在“接管/覆盖”的明确流程里重试。

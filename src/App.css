@@ -325,6 +325,28 @@
   gap: 10px;
 }
 
+.skill-github-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.skill-github-open:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover, rgba(0, 0, 0, 0.06));
+}
+
+[data-theme="dark"] .skill-github-open:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .skill-name {
   font-weight: 600;
   color: var(--text-primary);
@@ -692,6 +714,11 @@
   color: var(--text-primary);
   background: var(--bg-element);
   border-color: var(--text-tertiary);
+}
+
+.header-repo-btn {
+  font-family: var(--font-ui);
+  font-weight: 500;
 }
 
 .modal-backdrop {
@@ -1987,6 +2014,29 @@
   font-size: 14px;
   color: var(--text-primary);
   margin-bottom: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.explore-github-link {
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.explore-github-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-element);
 }
 
 .explore-card-author {

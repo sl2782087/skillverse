@@ -13,8 +13,8 @@ use super::content_hash::hash_dir;
 use super::git_fetcher::clone_or_pull;
 use super::github_download::{download_github_directory, parse_github_api_params};
 use super::skill_store::{SkillRecord, SkillStore};
-use super::sync_engine::copy_dir_recursive;
 use super::sync_engine::sync_dir_copy_with_overwrite;
+use super::sync_engine::{copy_dir_recursive, copy_dir_recursive_materialize_symlinks};
 use super::tool_adapters::adapter_by_key;
 use super::tool_adapters::is_tool_installed;
 
@@ -192,7 +192,7 @@ pub fn install_git_skill<R: tauri::Runtime>(
                 if !sub_src.exists() {
                     anyhow::bail!("subpath not found in repo: {:?}", sub_src);
                 }
-                copy_dir_recursive(&sub_src, &central_path)
+                copy_dir_recursive_materialize_symlinks(&sub_src, &central_path, &repo_dir)
                     .with_context(|| format!("copy {:?} -> {:?}", sub_src, central_path))?;
                 revision = rev;
             }
@@ -224,7 +224,7 @@ pub fn install_git_skill<R: tauri::Runtime>(
             repo_dir.clone()
         };
 
-        copy_dir_recursive(&copy_src, &central_path)
+        copy_dir_recursive_materialize_symlinks(&copy_src, &central_path, &repo_dir)
             .with_context(|| format!("copy {:?} -> {:?}", copy_src, central_path))?;
         revision = rev;
     }
@@ -679,7 +679,7 @@ pub fn update_managed_skill_from_source<R: tauri::Runtime>(
             anyhow::bail!("path not found in repo: {:?}", copy_src);
         }
 
-        copy_dir_recursive(&copy_src, &staging_dir)
+        copy_dir_recursive_materialize_symlinks(&copy_src, &staging_dir, &repo_dir)
             .with_context(|| format!("copy {:?} -> {:?}", copy_src, staging_dir))?;
     } else if record.source_type == "local" {
         let source = record
@@ -1059,7 +1059,7 @@ pub fn install_git_skill_from_selection<R: tauri::Runtime>(
         anyhow::bail!("path not found in repo: {:?}", copy_src);
     }
 
-    copy_dir_recursive(&copy_src, &central_path)
+    copy_dir_recursive_materialize_symlinks(&copy_src, &central_path, &repo_dir)
         .with_context(|| format!("copy {:?} -> {:?}", copy_src, central_path))?;
 
     // Prefer name from SKILL.md over derived name (fixes #28).

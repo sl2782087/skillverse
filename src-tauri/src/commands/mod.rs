@@ -260,6 +260,28 @@ fn expand_home_path(input: &str) -> Result<std::path::PathBuf, anyhow::Error> {
     Ok(std::path::PathBuf::from(trimmed))
 }
 
+fn open_dir_in_file_manager(path: &std::path::Path) -> Result<(), anyhow::Error> {
+    #[cfg(target_os = "macos")]
+    let mut cmd = std::process::Command::new("open");
+    #[cfg(target_os = "windows")]
+    let mut cmd = std::process::Command::new("explorer");
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let mut cmd = std::process::Command::new("xdg-open");
+
+    let status = cmd
+        .arg(path)
+        .status()
+        .with_context(|| format!("failed to launch file manager for {:?}", path))?;
+    if !status.success() {
+        anyhow::bail!(
+            "file manager exited with status {} while opening {:?}",
+            status,
+            path
+        );
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn get_central_repo_path(
     app: tauri::AppHandle,
@@ -274,6 +296,28 @@ pub async fn get_central_repo_path(
     .await
     .map_err(|err| err.to_string())?
     .map_err(format_anyhow_error)
+}
+
+#[tauri::command]
+pub async fn open_central_repo_folder(
+    app: tauri::AppHandle,
+    store: State<'_, SkillStore>,
+) -> Result<(), String> {
+    let store = store.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let path = resolve_central_repo_path(&app, &store)?;
+        ensure_central_repo(&path)?;
+        open_dir_in_file_manager(&path)?;
+        Ok::<_, anyhow::Error>(())
+    })
+    .await
+    .map_err(|err| err.to_string())?
+    .map_err(format_anyhow_error)
+}
+
+#[tauri::command]
+pub async fn set_ui_language(app: tauri::AppHandle, language: String) -> Result<(), String> {
+    crate::update_native_menu_language(&app, Some(language.as_str()))
 }
 
 #[tauri::command]
@@ -723,6 +767,7 @@ pub struct ManagedSkillDto {
     pub description: Option<String>,
     pub source_type: String,
     pub source_ref: Option<String>,
+    pub source_subpath: Option<String>,
     pub central_path: String,
     pub created_at: i64,
     pub updated_at: i64,
@@ -854,6 +899,7 @@ fn get_managed_skills_impl(store: &SkillStore) -> Result<Vec<ManagedSkillDto>, S
                 description: skill.description,
                 source_type: skill.source_type,
                 source_ref: skill.source_ref,
+                source_subpath: skill.source_subpath,
                 central_path: skill.central_path,
                 created_at: skill.created_at,
                 updated_at: skill.updated_at,

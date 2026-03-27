@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-03-27
+
+### Added
+- **Native menu shortcuts**: Added a top app-menu group (`Features`) and tray menu actions to open the Skills storage path quickly.
+- **Runtime menu i18n sync**: App menu and tray menu labels now switch between English/Chinese immediately when users toggle language in-app.
+
+### Changed
+- **Menu wording update**: Renamed "Quick Actions" to "Features" and changed "Open central repository" to "Open Skills storage path".
+- **Entry simplification**: Removed the header-level storage-path button to keep high-frequency native actions in system menus.
+
+### Fixed
+- **Open path reliability**: Opening the Skills storage path now uses backend system open commands, avoiding `Not allowed to open path` permission errors from plugin scope checks.
+- **Git install materialization for symlink-based repos**: Fixed installation issues for repositories like `ui-ux-pro-max` where in-repo symlinks (or symlink-like pointer files) were previously copied as plain text instead of expanded into real directories/files.
+
 ## [0.4.1] - 2026-03-21
 
 ### Added

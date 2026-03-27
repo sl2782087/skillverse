@@ -30,6 +30,7 @@ export type ManagedSkill = {
   description?: string | null
   source_type: string
   source_ref?: string | null
+  source_subpath?: string | null
   central_path: string
   created_at: number
   updated_at: number

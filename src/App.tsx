@@ -221,6 +221,20 @@ function App() {
     }
   }
 
+  const getGithubOpenUrl = (skill: ManagedSkill) => {
+    const st = skill.source_type.toLowerCase()
+    if (!st.includes('git') || !skill.source_ref) return null
+    const info = getGithubInfo(skill.source_ref)
+    if (!info) return null
+    const sub = skill.source_subpath?.trim()
+    if (!sub) return info.href
+    const ref = skill.source_ref.trim()
+    const m = ref.match(/github\.com\/[^/]+\/[^/]+\/tree\/([^/?#]+)/i)
+    const branch = m?.[1] ? decodeURIComponent(m[1]) : 'main'
+    const cleanSub = sub.replace(/^\/+/, '')
+    return `https://github.com/${info.label}/tree/${encodeURIComponent(branch)}/${cleanSub}`
+  }
+
   const loadPlan = useCallback(async () => {
     setLoading(true)
     setLoadingStartAt(Date.now())
@@ -281,6 +295,12 @@ function App() {
       // ignore storage failures
     }
   }, [language, languageStorageKey])
+
+  useEffect(() => {
+    if (!isTauri) return
+    if (language !== 'en' && language !== 'zh') return
+    invokeTauri('set_ui_language', { language }).catch(() => {})
+  }, [invokeTauri, isTauri, language])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -1870,6 +1890,7 @@ function App() {
               installedTools={installedTools}
               loading={loading}
               getGithubInfo={getGithubInfo}
+              getGithubOpenUrl={getGithubOpenUrl}
               getSkillSourceLabel={getSkillSourceLabel}
               formatRelative={formatRelative}
               onReviewImport={handleReviewImport}

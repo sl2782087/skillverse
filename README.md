@@ -16,6 +16,7 @@ A cross-platform desktop app (Tauri + React) to manage Agent Skills in one place
 - **Import sources**: Local folder / Git URL (including multi-skill repo selection, `.claude/skills/` directory support)
 - **Update**: Refresh from source; propagate updates to copy-mode targets
 - **New tool detection**: Detect newly installed tools and prompt to sync managed skills
+- **Native menu actions**: Open Skills storage path from app menu (`Features`) or tray menu, with runtime EN/ZH label sync
 
 ### My Skills
 ![My Skills](docs/assets/my-skills.png)
@@ -122,7 +123,7 @@ cargo test
 
 ## FAQ / Notes
 
-- Where are skills stored? The Central Repo defaults to `~/.skillshub` (configurable in Settings).
+- Where are skills stored? The Skills storage path defaults to `~/.skillshub` (configurable in Settings), and can be opened from app menu (`Features`) or tray menu.
 - Why is Cursor sync always copy? Cursor currently does not support symlink/junction-based skill directories, so Skills Hub forces directory copy when syncing to Cursor.
 - Why does sync sometimes fall back to copy? Skills Hub prefers symlink/junction, but on some systems (especially Windows) symlinks may be restricted; in that case it falls back to directory copy.
 - What does `TARGET_EXISTS|...` mean? The target folder already exists and the operation did not overwrite it (default is non-destructive). Remove the existing folder or retry with the appropriate overwrite flow.

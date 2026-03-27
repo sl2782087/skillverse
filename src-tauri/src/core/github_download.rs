@@ -6,8 +6,11 @@ use std::path::Path;
 use anyhow::{Context, Result};
 use reqwest::blocking::Client;
 use serde::Deserialize;
+use serde_json::Value;
 
 use super::cancel_token::CancelToken;
+
+const MAX_SYMLINK_DEPTH: u32 = 64;
 
 #[derive(Debug, Deserialize)]
 struct GithubContent {
@@ -16,6 +19,37 @@ struct GithubContent {
     content_type: String,
     download_url: Option<String>,
     path: String,
+    #[serde(default)]
+    target: Option<String>,
+}
+
+/// Resolve a Git-relative symlink target against the parent directory of `symlink_api_path`
+/// (GitHub API path of the symlink entry, e.g. `.claude/skills/foo/data`).
+pub fn resolve_repo_relative_symlink(symlink_api_path: &str, target: &str) -> Result<String> {
+    if target.starts_with('/') {
+        anyhow::bail!("absolute symlink targets are not supported: {}", target);
+    }
+    let parent_dir = symlink_api_path
+        .rsplit_once('/')
+        .map(|(p, _)| p)
+        .filter(|p| !p.is_empty())
+        .unwrap_or("");
+    let mut stack: Vec<&str> = parent_dir.split('/').filter(|s| !s.is_empty()).collect();
+    for comp in target.split('/') {
+        match comp {
+            "" | "." => {}
+            ".." => {
+                stack
+                    .pop()
+                    .ok_or_else(|| anyhow::anyhow!("symlink escapes repository root"))?;
+            }
+            c => stack.push(c),
+        }
+    }
+    if stack.is_empty() {
+        anyhow::bail!("resolved symlink path is empty");
+    }
+    Ok(stack.join("/"))
 }
 
 /// Download a directory from a GitHub repo using the Contents API.
@@ -41,7 +75,60 @@ pub fn download_github_directory(
 
     std::fs::create_dir_all(dest).with_context(|| format!("create directory {:?}", dest))?;
 
-    download_dir_recursive(&client, owner, repo, branch, path, dest, cancel, token)
+    download_dir_recursive(&client, owner, repo, branch, path, dest, cancel, token, 0)
+}
+
+fn github_contents_url(owner: &str, repo: &str, path: &str, branch: &str) -> String {
+    format!(
+        "https://api.github.com/repos/{}/{}/contents/{}?ref={}",
+        owner, repo, path, branch
+    )
+}
+
+fn fetch_contents_response(
+    client: &Client,
+    owner: &str,
+    repo: &str,
+    branch: &str,
+    path: &str,
+    token: Option<&str>,
+    context: &str,
+) -> Result<Value> {
+    let url = github_contents_url(owner, repo, path, branch);
+    let mut req = client
+        .get(&url)
+        .header("User-Agent", "skills-hub")
+        .header("Accept", "application/vnd.github.v3+json");
+    if let Some(t) = token {
+        req = req.header("Authorization", format!("Bearer {}", t));
+    }
+    let resp = req
+        .send()
+        .with_context(|| format!("request GitHub contents: {}", url))?;
+    let resp = check_github_response(resp, context)?;
+    let v: Value = resp
+        .json()
+        .with_context(|| format!("parse GitHub contents JSON: {}", url))?;
+    Ok(v)
+}
+
+enum ContentsBody {
+    Directory(Vec<GithubContent>),
+    Single(GithubContent),
+}
+
+fn parse_contents_body(v: Value, context: &str) -> Result<ContentsBody> {
+    if v.is_array() {
+        let items: Vec<GithubContent> = serde_json::from_value(v)
+            .with_context(|| format!("parse directory listing {}", context))?;
+        return Ok(ContentsBody::Directory(items));
+    }
+    if v.is_object() {
+        let item: GithubContent =
+            serde_json::from_value(v).with_context(|| format!("parse single item {}", context))?;
+        return Ok(ContentsBody::Single(item));
+    }
+    anyhow::bail!("unexpected GitHub contents JSON for {}", context);
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -54,80 +141,230 @@ fn download_dir_recursive(
     dest: &Path,
     cancel: Option<&CancelToken>,
     token: Option<&str>,
+    symlink_depth: u32,
 ) -> Result<()> {
     if cancel.is_some_and(|c| c.is_cancelled()) {
         anyhow::bail!("CANCELLED|操作已被用户取消。");
     }
 
-    let url = format!(
-        "https://api.github.com/repos/{}/{}/contents/{}?ref={}",
-        owner, repo, path, branch
-    );
+    let v = fetch_contents_response(client, owner, repo, branch, path, token, path)?;
 
-    let mut req = client
-        .get(&url)
-        .header("User-Agent", "skills-hub")
-        .header("Accept", "application/vnd.github.v3+json");
-    if let Some(t) = token {
-        req = req.header("Authorization", format!("Bearer {}", t));
-    }
-    let resp = req
-        .send()
-        .with_context(|| format!("request GitHub contents: {}", url))?;
-    let resp = check_github_response(resp, &url)?;
-
-    let items: Vec<GithubContent> = resp
-        .json()
-        .with_context(|| format!("parse GitHub contents response: {}", url))?;
-
-    for item in items {
-        if cancel.is_some_and(|c| c.is_cancelled()) {
-            anyhow::bail!("CANCELLED|操作已被用户取消。");
-        }
-
-        let local_path = dest.join(&item.name);
-
-        match item.content_type.as_str() {
-            "file" => {
-                if let Some(download_url) = &item.download_url {
-                    if let Some(parent) = local_path.parent() {
-                        std::fs::create_dir_all(parent)
-                            .with_context(|| format!("create parent dir {:?}", parent))?;
-                    }
-                    let mut file_req = client.get(download_url).header("User-Agent", "skills-hub");
-                    if let Some(t) = token {
-                        file_req = file_req.header("Authorization", format!("Bearer {}", t));
-                    }
-                    let file_resp = file_req
-                        .send()
-                        .with_context(|| format!("download file: {}", item.path))?;
-                    let file_resp = check_github_response(file_resp, &item.path)?;
-                    let bytes = file_resp
-                        .bytes()
-                        .with_context(|| format!("read file bytes: {}", item.path))?;
-
-                    std::fs::write(&local_path, &bytes)
-                        .with_context(|| format!("write file {:?}", local_path))?;
+    match parse_contents_body(v, path)? {
+        ContentsBody::Directory(items) => {
+            for item in items {
+                if cancel.is_some_and(|c| c.is_cancelled()) {
+                    anyhow::bail!("CANCELLED|操作已被用户取消。");
                 }
-            }
-            "dir" => {
-                download_dir_recursive(
+                process_content_entry(
                     client,
                     owner,
                     repo,
                     branch,
-                    &item.path,
-                    &local_path,
+                    &item,
+                    dest,
                     cancel,
                     token,
+                    symlink_depth,
                 )?;
             }
-            _ => {
-                // Skip symlinks, submodules, etc.
+        }
+        ContentsBody::Single(item) => {
+            if item.content_type == "file" {
+                if let Some(parent) = dest.parent() {
+                    std::fs::create_dir_all(parent)
+                        .with_context(|| format!("create parent dir {:?}", parent))?;
+                }
+                download_file_bytes(client, &item, dest, token)?;
+            } else if item.content_type == "symlink" {
+                expand_github_symlink(
+                    client,
+                    owner,
+                    repo,
+                    branch,
+                    &item,
+                    dest,
+                    cancel,
+                    token,
+                    symlink_depth,
+                )?;
+            } else {
+                anyhow::bail!(
+                    "expected a directory listing at {}, got single {:?}",
+                    path,
+                    item.content_type
+                );
             }
         }
     }
 
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn process_content_entry(
+    client: &Client,
+    owner: &str,
+    repo: &str,
+    branch: &str,
+    item: &GithubContent,
+    dest_dir: &Path,
+    cancel: Option<&CancelToken>,
+    token: Option<&str>,
+    symlink_depth: u32,
+) -> Result<()> {
+    let local_path = dest_dir.join(&item.name);
+
+    match item.content_type.as_str() {
+        "file" => {
+            if let Some(parent) = local_path.parent() {
+                std::fs::create_dir_all(parent)
+                    .with_context(|| format!("create parent dir {:?}", parent))?;
+            }
+            download_file_bytes(client, item, &local_path, token)?;
+        }
+        "dir" => {
+            download_dir_recursive(
+                client,
+                owner,
+                repo,
+                branch,
+                &item.path,
+                &local_path,
+                cancel,
+                token,
+                symlink_depth,
+            )?;
+        }
+        "symlink" => {
+            expand_github_symlink(
+                client,
+                owner,
+                repo,
+                branch,
+                item,
+                &local_path,
+                cancel,
+                token,
+                symlink_depth,
+            )?;
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn download_file_bytes(
+    client: &Client,
+    item: &GithubContent,
+    local_path: &Path,
+    token: Option<&str>,
+) -> Result<()> {
+    let download_url = item
+        .download_url
+        .as_deref()
+        .ok_or_else(|| anyhow::anyhow!("missing download_url for {}", item.path))?;
+    let mut file_req = client.get(download_url).header("User-Agent", "skills-hub");
+    if let Some(t) = token {
+        file_req = file_req.header("Authorization", format!("Bearer {}", t));
+    }
+    let file_resp = file_req
+        .send()
+        .with_context(|| format!("download file: {}", item.path))?;
+    let file_resp = check_github_response(file_resp, &item.path)?;
+    let bytes = file_resp
+        .bytes()
+        .with_context(|| format!("read file bytes: {}", item.path))?;
+    std::fs::write(local_path, &bytes).with_context(|| format!("write file {:?}", local_path))?;
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn expand_github_symlink(
+    client: &Client,
+    owner: &str,
+    repo: &str,
+    branch: &str,
+    item: &GithubContent,
+    local_path: &Path,
+    cancel: Option<&CancelToken>,
+    token: Option<&str>,
+    symlink_depth: u32,
+) -> Result<()> {
+    if symlink_depth >= MAX_SYMLINK_DEPTH {
+        anyhow::bail!(
+            "symlink expansion depth exceeded (max {}) at {}",
+            MAX_SYMLINK_DEPTH,
+            item.path
+        );
+    }
+    let target = if let Some(t) = item.target.as_deref() {
+        t.to_string()
+    } else {
+        // Directory listing payload may omit `target` for symlink items.
+        // Query this entry directly to retrieve the concrete symlink target.
+        let v =
+            fetch_contents_response(client, owner, repo, branch, &item.path, token, &item.path)?;
+        match parse_contents_body(v, &item.path)? {
+            ContentsBody::Single(single) => single.target.ok_or_else(|| {
+                anyhow::anyhow!("GitHub symlink missing target field: {}", item.path)
+            })?,
+            ContentsBody::Directory(_) => {
+                anyhow::bail!("expected symlink object for {}, got directory", item.path);
+            }
+        }
+    };
+    let resolved = resolve_repo_relative_symlink(&item.path, &target)?;
+
+    let v = fetch_contents_response(client, owner, repo, branch, &resolved, token, &resolved)?;
+    match parse_contents_body(v, &resolved)? {
+        ContentsBody::Directory(items) => {
+            std::fs::create_dir_all(local_path)
+                .with_context(|| format!("create dir {:?}", local_path))?;
+            for child in items {
+                if cancel.is_some_and(|c| c.is_cancelled()) {
+                    anyhow::bail!("CANCELLED|操作已被用户取消。");
+                }
+                process_content_entry(
+                    client,
+                    owner,
+                    repo,
+                    branch,
+                    &child,
+                    local_path,
+                    cancel,
+                    token,
+                    symlink_depth + 1,
+                )?;
+            }
+        }
+        ContentsBody::Single(child) => {
+            if child.content_type == "file" {
+                if let Some(parent) = local_path.parent() {
+                    std::fs::create_dir_all(parent)
+                        .with_context(|| format!("create parent dir {:?}", parent))?;
+                }
+                download_file_bytes(client, &child, local_path, token)?;
+            } else if child.content_type == "symlink" {
+                expand_github_symlink(
+                    client,
+                    owner,
+                    repo,
+                    branch,
+                    &child,
+                    local_path,
+                    cancel,
+                    token,
+                    symlink_depth + 1,
+                )?;
+            } else {
+                anyhow::bail!(
+                    "unsupported symlink target type {:?} at {}",
+                    child.content_type,
+                    resolved
+                );
+            }
+        }
+    }
     Ok(())
 }
 
@@ -201,6 +438,27 @@ pub fn parse_github_api_params(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resolve_symlink_typical_monorepo() {
+        let r = resolve_repo_relative_symlink(
+            ".claude/skills/ui-ux-pro-max/data",
+            "../../../src/ui-ux-pro-max/data",
+        )
+        .unwrap();
+        assert_eq!(r, "src/ui-ux-pro-max/data");
+    }
+
+    #[test]
+    fn resolve_symlink_same_dir() {
+        let r = resolve_repo_relative_symlink("skills/foo/bar", "../baz").unwrap();
+        assert_eq!(r, "skills/baz");
+    }
+
+    #[test]
+    fn resolve_symlink_escape_fails() {
+        assert!(resolve_repo_relative_symlink("a", "../../../..").is_err());
+    }
 
     #[test]
     fn parse_github_api_params_extracts_correctly() {

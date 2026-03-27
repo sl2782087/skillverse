@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react'
-import { Plus, Search, Star } from 'lucide-react'
+import { Github, Plus, Search, Star } from 'lucide-react'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { TFunction } from 'i18next'
 import type { FeaturedSkillDto, ManagedSkill, OnlineSkillDto } from './types'
 
@@ -21,6 +22,23 @@ function formatCount(n: number): string {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`
   return String(n)
+}
+
+function getGithubRepoUrl(sourceUrl: string): string | null {
+  const normalized = sourceUrl.replace(/^git\+/, '').trim()
+  try {
+    const u = new URL(normalized)
+    if (!u.hostname.includes('github.com')) return null
+    const parts = u.pathname.split('/').filter(Boolean)
+    const owner = parts[0]
+    const repo = parts[1]?.replace(/\.git$/, '')
+    if (!owner || !repo) return null
+    return `https://github.com/${owner}/${repo}`
+  } catch {
+    const m = normalized.match(/github\.com\/([^/]+)\/([^/#?]+)/i)
+    if (!m) return null
+    return `https://github.com/${m[1]}/${m[2].replace(/\.git$/, '')}`
+  }
 }
 
 const ExplorePage = ({
@@ -52,6 +70,18 @@ const ExplorePage = ({
   }, [searchResults, filteredSkills])
 
   const isSearchActive = exploreFilter.trim().length >= 2
+
+  const handleOpenGithub = (url: string) => {
+    const repoUrl = getGithubRepoUrl(url)
+    if (!repoUrl) return
+    void (async () => {
+      try {
+        await openUrl(repoUrl)
+      } catch {
+        window.open(repoUrl, '_blank', 'noopener,noreferrer')
+      }
+    })()
+  }
 
   // Check if a skill is already installed by matching name + source (case-insensitive)
   const installedSkillKeys = useMemo(() => {
@@ -122,6 +152,17 @@ const ExplorePage = ({
                       <div className="explore-card-top">
                         <div className="explore-card-info">
                           <div className="explore-card-name">{skill.name}</div>
+                          {getGithubRepoUrl(skill.source_url) ? (
+                            <button
+                              type="button"
+                              className="explore-github-link"
+                              title={t('openSkillOnGithub')}
+                              aria-label={t('openSkillOnGithubAria')}
+                              onClick={() => handleOpenGithub(skill.source_url)}
+                            >
+                              <Github size={13} />
+                            </button>
+                          ) : null}
                           <div className="explore-card-author">
                             {skill.source_url
                               .replace('https://github.com/', '')
@@ -175,6 +216,17 @@ const ExplorePage = ({
                           <div className="explore-card-top">
                             <div className="explore-card-info">
                               <div className="explore-card-name">{skill.name}</div>
+                              {getGithubRepoUrl(skill.source_url) ? (
+                                <button
+                                  type="button"
+                                  className="explore-github-link"
+                                  title={t('openSkillOnGithub')}
+                                  aria-label={t('openSkillOnGithubAria')}
+                                  onClick={() => handleOpenGithub(skill.source_url)}
+                                >
+                                  <Github size={13} />
+                                </button>
+                              ) : null}
                               <div className="explore-card-author">{skill.source}</div>
                             </div>
                             {installed ? (

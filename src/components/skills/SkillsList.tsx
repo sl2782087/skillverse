@@ -15,6 +15,7 @@ type SkillsListProps = {
   installedTools: ToolOption[]
   loading: boolean
   getGithubInfo: (url: string | null | undefined) => GithubInfo | null
+  getGithubOpenUrl: (skill: ManagedSkill) => string | null
   getSkillSourceLabel: (skill: ManagedSkill) => string
   formatRelative: (ms: number | null | undefined) => string
   onReviewImport: () => void
@@ -31,6 +32,7 @@ const SkillsList = ({
   installedTools,
   loading,
   getGithubInfo,
+  getGithubOpenUrl,
   getSkillSourceLabel,
   formatRelative,
   onReviewImport,
@@ -77,6 +79,7 @@ const SkillsList = ({
               installedTools={installedTools}
               loading={loading}
               getGithubInfo={getGithubInfo}
+              getGithubOpenUrl={getGithubOpenUrl}
               getSkillSourceLabel={getSkillSourceLabel}
               formatRelative={formatRelative}
               onUpdate={onUpdateSkill}

@@ -1,5 +1,6 @@
-import { memo, useState } from 'react'
+import { memo, useState, type MouseEvent } from 'react'
 import { Box, Copy, Folder, Github, RefreshCw, Trash2 } from 'lucide-react'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { toast } from 'sonner'
 import type { TFunction } from 'i18next'
 import type { ManagedSkill, ToolOption } from './types'
@@ -14,6 +15,7 @@ type SkillCardProps = {
   installedTools: ToolOption[]
   loading: boolean
   getGithubInfo: (url: string | null | undefined) => GithubInfo | null
+  getGithubOpenUrl: (skill: ManagedSkill) => string | null
   getSkillSourceLabel: (skill: ManagedSkill) => string
   formatRelative: (ms: number | null | undefined) => string
   onUpdate: (skill: ManagedSkill) => void
@@ -30,6 +32,7 @@ const SkillCard = ({
   installedTools,
   loading,
   getGithubInfo,
+  getGithubOpenUrl,
   getSkillSourceLabel,
   formatRelative,
   onUpdate,
@@ -47,6 +50,7 @@ const SkillCard = ({
     <Box size={20} />
   )
   const github = getGithubInfo(skill.source_ref)
+  const githubOpenUrl = getGithubOpenUrl(skill)
   const copyValue = (github?.href ?? skill.source_ref ?? '').trim()
 
   const handleCopy = async () => {
@@ -57,6 +61,18 @@ const SkillCard = ({
     } catch {
       toast.error(t('copyFailed'))
     }
+  }
+
+  const handleOpenGithub = (e: MouseEvent) => {
+    e.stopPropagation()
+    if (!githubOpenUrl) return
+    void (async () => {
+      try {
+        await openUrl(githubOpenUrl)
+      } catch {
+        window.open(githubOpenUrl, '_blank', 'noopener,noreferrer')
+      }
+    })()
   }
 
   // Split tools into synced and remaining for badge display
@@ -88,6 +104,17 @@ const SkillCard = ({
           >
             {skill.name}
           </button>
+          {githubOpenUrl ? (
+            <button
+              type="button"
+              className="skill-github-open"
+              title={t('openSkillOnGithub')}
+              aria-label={t('openSkillOnGithubAria')}
+              onClick={handleOpenGithub}
+            >
+              <Github size={18} />
+            </button>
+          ) : null}
         </div>
         {skill.description ? (
           <div className="skill-desc">{skill.description}</div>
