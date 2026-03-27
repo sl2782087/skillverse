@@ -151,18 +151,20 @@ const ExplorePage = ({
                     <div key={skill.slug} className="explore-card">
                       <div className="explore-card-top">
                         <div className="explore-card-info">
-                          <div className="explore-card-name">{skill.name}</div>
-                          {getGithubRepoUrl(skill.source_url) ? (
-                            <button
-                              type="button"
-                              className="explore-github-link"
-                              title={t('openSkillOnGithub')}
-                              aria-label={t('openSkillOnGithubAria')}
-                              onClick={() => handleOpenGithub(skill.source_url)}
-                            >
-                              <Github size={13} />
-                            </button>
-                          ) : null}
+                            <div className="explore-card-title-row">
+                              <div className="explore-card-name">{skill.name}</div>
+                              {getGithubRepoUrl(skill.source_url) ? (
+                                <button
+                                  type="button"
+                                  className="explore-github-link"
+                                  title={t('openSkillOnGithub')}
+                                  aria-label={t('openSkillOnGithubAria')}
+                                  onClick={() => handleOpenGithub(skill.source_url)}
+                                >
+                                  <Github size={14} />
+                                </button>
+                              ) : null}
+                            </div>
                           <div className="explore-card-author">
                             {skill.source_url
                               .replace('https://github.com/', '')
@@ -215,18 +217,20 @@ const ExplorePage = ({
                         <div key={skill.source} className="explore-card">
                           <div className="explore-card-top">
                             <div className="explore-card-info">
-                              <div className="explore-card-name">{skill.name}</div>
-                              {getGithubRepoUrl(skill.source_url) ? (
-                                <button
-                                  type="button"
-                                  className="explore-github-link"
-                                  title={t('openSkillOnGithub')}
-                                  aria-label={t('openSkillOnGithubAria')}
-                                  onClick={() => handleOpenGithub(skill.source_url)}
-                                >
-                                  <Github size={13} />
-                                </button>
-                              ) : null}
+                              <div className="explore-card-title-row">
+                                <div className="explore-card-name">{skill.name}</div>
+                                {getGithubRepoUrl(skill.source_url) ? (
+                                  <button
+                                    type="button"
+                                    className="explore-github-link"
+                                    title={t('openSkillOnGithub')}
+                                    aria-label={t('openSkillOnGithubAria')}
+                                    onClick={() => handleOpenGithub(skill.source_url)}
+                                  >
+                                    <Github size={14} />
+                                  </button>
+                                ) : null}
+                              </div>
                               <div className="explore-card-author">{skill.source}</div>
                             </div>
                             {installed ? (
