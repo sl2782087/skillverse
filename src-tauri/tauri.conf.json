@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Skills Hub",
+  "productName": "Skillverse",
   "version": "0.4.2",
   "identifier": "com.qufei1993.skillshub",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Skills Hub",
+        "title": "Skillverse",
         "width": 800,
         "height": 600,
         "resizable": true,

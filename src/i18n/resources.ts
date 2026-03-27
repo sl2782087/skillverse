@@ -1,7 +1,7 @@
 export const resources = {
   en: {
     translation: {
-      appName: 'Skills Hub',
+      appName: 'Skillverse',
       unknown: 'unknown',
       languageShort: {
         en: 'EN',
@@ -169,8 +169,9 @@ export const resources = {
       foundIn: 'Found in',
       errors: {
         notTauri: 'Current environment is not Tauri. Please run `npm run tauri dev`.',
-        skillExistsInHub: 'This skill already exists in Hub. No need to install again.',
-        skillExistsInHubNamed: '"{{name}}" already exists in Hub. Go to My Skills to update it.',
+        skillExistsInHub: 'This skill already exists in Skillverse. No need to install again.',
+        skillExistsInHubNamed:
+          '"{{name}}" already exists in Skillverse. Go to My Skills to update it.',
         targetExists: 'Target folder already exists. Please remove it and try again.',
         targetExistsDetail:
           'Target folder already exists: {{path}}. For safety it was not overwritten.',
@@ -234,7 +235,7 @@ export const resources = {
         confirmPrefix: 'Are you sure you want to delete ',
         confirmSuffix: '?',
         warningRemoveFromTools: 'Remove from synced tools',
-        warningDeleteFromHub: 'Delete local copy from Hub',
+        warningDeleteFromHub: 'Delete local copy from Skillverse',
         confirmButton: 'Yes, Delete',
       },
       layout: {
@@ -309,7 +310,7 @@ export const resources = {
   },
   zh: {
     translation: {
-      appName: 'Skills Hub',
+      appName: 'Skillverse',
       unknown: '未知',
       languageShort: {
         en: 'EN',
@@ -472,8 +473,8 @@ export const resources = {
       foundIn: '发现于',
       errors: {
         notTauri: '当前环境不是 Tauri，请用 `npm run tauri dev` 启动应用。',
-        skillExistsInHub: '该 Skill 已存在于 Hub，无需重复安装。',
-        skillExistsInHubNamed: '「{{name}}」已存在于 Hub，可前往"我的 Skills"中更新。',
+        skillExistsInHub: '该 Skill 已存在于 Skillverse，无需重复安装。',
+        skillExistsInHubNamed: '「{{name}}」已存在于 Skillverse，可前往"我的 Skills"中更新。',
         targetExists: '目标目录已存在，请先清理后重试。',
         targetExistsDetail:
           '目标目录已存在同名 Skill：{{path}}。为安全起见未覆盖。\n你可以：先手动清理该目录后重试。',
@@ -533,7 +534,7 @@ export const resources = {
         confirmPrefix: '确定要删除 ',
         confirmSuffix: '？',
         warningRemoveFromTools: '将从已同步的工具中移除',
-        warningDeleteFromHub: '删除 Hub 的本地副本',
+        warningDeleteFromHub: '删除 Skillverse 的本地副本',
         confirmButton: '确认删除',
       },
       layout: {

@@ -1,4 +1,4 @@
-# Skills Hub (Tauri Desktop)
+# Skillverse (Tauri Desktop)
 
 A cross-platform desktop app (Tauri + React) to manage Agent Skills in one place and sync them to multiple AI coding tools’ global skills directories (prefer symlink/junction, fallback to copy) — “Install once, sync everywhere”.
 
@@ -124,10 +124,10 @@ cargo test
 ## FAQ / Notes
 
 - Where are skills stored? The Skills storage path defaults to `~/.skillshub` (configurable in Settings), and can be opened from app menu (`Features`) or tray menu.
-- Why is Cursor sync always copy? Cursor currently does not support symlink/junction-based skill directories, so Skills Hub forces directory copy when syncing to Cursor.
-- Why does sync sometimes fall back to copy? Skills Hub prefers symlink/junction, but on some systems (especially Windows) symlinks may be restricted; in that case it falls back to directory copy.
+- Why is Cursor sync always copy? Cursor currently does not support symlink/junction-based skill directories, so Skillverse forces directory copy when syncing to Cursor.
+- Why does sync sometimes fall back to copy? Skillverse prefers symlink/junction, but on some systems (especially Windows) symlinks may be restricted; in that case it falls back to directory copy.
 - What does `TARGET_EXISTS|...` mean? The target folder already exists and the operation did not overwrite it (default is non-destructive). Remove the existing folder or retry with the appropriate overwrite flow.
-- macOS Gatekeeper note (unsigned/notarized builds, may vary by macOS version): if you see “damaged” or “unverified developer”, run `xattr -cr "/Applications/Skills Hub.app"` (https://v2.tauri.app/distribute/#macos).
+- macOS Gatekeeper note (unsigned/notarized builds, may vary by macOS version): if you see “damaged” or “unverified developer”, run `xattr -cr "/Applications/Skillverse.app"` (https://v2.tauri.app/distribute/#macos).
 
 ## Supported Platforms
 
@@ -138,3 +138,9 @@ cargo test
 ## License
 
 MIT License — see `LICENSE`.
+
+## Upstream Attribution (MIT)
+
+Skillverse is a renamed and extended derivative of the original `Skills Hub` project.
+Per the MIT License, the original copyright and license notice are preserved.
+See `NOTICE` for attribution details.
