@@ -1822,6 +1822,15 @@ function App() {
     [handleUpdateManaged],
   )
 
+  const handleSyncNow = useCallback(
+    (_skill: ManagedSkill) => {
+      void handleSyncAllManagedToTools(
+        installedTools.filter((t) => syncTargets[t.id]).map((t) => t.id),
+      )
+    },
+    [handleSyncAllManagedToTools, installedTools, syncTargets],
+  )
+
   const handleSharedCancel = useCallback(() => {
     if (loading) return
     setPendingSharedToggle(null)
@@ -1898,7 +1907,9 @@ function App() {
             <SkillsList
               plan={plan}
               visibleSkills={visibleSkills}
+              managedSkills={managedSkills}
               installedTools={installedTools}
+              toolStatus={toolStatus}
               loading={loading}
               getGithubInfo={getGithubInfo}
               getGithubOpenUrl={getGithubOpenUrl}
@@ -1908,6 +1919,7 @@ function App() {
               onUpdateSkill={handleUpdateSkill}
               onDeleteSkill={handleDeletePrompt}
               onToggleTool={handleToggleToolForSkill}
+              onSyncNow={handleSyncNow}
               onOpenDetail={handleOpenDetail}
               t={t}
             />
