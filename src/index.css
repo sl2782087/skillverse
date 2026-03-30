@@ -53,6 +53,9 @@
   --radius-lg: 12px;
   --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.08);
   --shadow-lg: 0 12px 24px -10px rgb(99 102 241 / 0.2);
+  /* Rail */
+  --bg-rail: #f1f5f9;
+  --border-rail: #e2e8f0;
 }
 
 :root[data-theme='dark'] {
@@ -102,6 +105,8 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.35);
   --shadow-lg: 0 12px 28px -10px rgb(0 0 0 / 0.55);
   color-scheme: dark;
+  --bg-rail: #070d1a;
+  --border-rail: #1a2540;
 }
 
 * {
