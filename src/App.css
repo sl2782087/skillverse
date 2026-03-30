@@ -2663,6 +2663,10 @@
   background: var(--accent-soft-bg);
   color: var(--text-primary);
 }
+.rail-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
 .rail-btn.active {
   background: rgba(99, 102, 241, 0.18);
   color: var(--accent-primary);

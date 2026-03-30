@@ -23,10 +23,10 @@ const Header = ({
   return (
     <aside className="skills-rail">
       <div className="rail-top">
-        <div className="rail-logo" aria-label="Skillverse">
+        <div className="rail-logo" aria-label={t('appName')}>
           <img src="/logo.png" alt="" className="rail-logo-img" />
         </div>
-        <nav className="rail-nav">
+        <nav className="rail-nav" aria-label={t('navMySkillsTooltip')}>
           <button
             type="button"
             className={`rail-btn${activeView === 'myskills' || activeView === 'detail' ? ' active' : ''}`}
