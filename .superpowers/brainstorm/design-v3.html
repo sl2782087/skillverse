@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skillverse — 新版设计稿</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #060c18;
+  color: #e2e8f0;
+  padding: 24px 20px 60px;
+}
+
+.title { font-size: 18px; font-weight: 800; background: linear-gradient(135deg,#818cf8,#c4b5fd); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; margin-bottom: 4px; }
+.subtitle { font-size: 12px; color: #475569; margin-bottom: 24px; }
+
+/* ===== APP SHELL ===== */
+.app-shell {
+  display: flex;
+  height: 680px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+  background: #0a1120;
+  box-shadow: 0 32px 64px -16px rgba(0,0,0,0.6);
+}
+
+/* ===== LEFT RAIL ===== */
+.rail {
+  width: 52px;
+  background: #070d1a;
+  border-right: 1px solid #1a2540;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  flex-shrink: 0;
+}
+.rail-logo {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  margin-bottom: 22px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.rail-logo-s { font-size: 13px; font-weight: 800; color: white; }
+.rail-sep { width: 24px; height: 1px; background: #1a2540; margin: 6px 0; }
+.nav-item {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: #334155; font-size: 16px; cursor: pointer;
+  transition: all 0.15s; position: relative;
+  margin-bottom: 2px;
+}
+.nav-item:hover { background: #111a2b; color: #64748b; }
+.nav-item.active { background: rgba(99,102,241,0.18); color: #818cf8; }
+.nav-item .tooltip {
+  position: absolute; left: 46px; top: 50%; transform: translateY(-50%);
+  background: #1e293b; color: #e2e8f0; font-size: 11px; font-weight: 500;
+  padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+  pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  border: 1px solid #2d3f5f;
+}
+.nav-item:hover .tooltip { opacity: 1; }
+.nav-item.bottom { margin-top: auto; }
+
+/* ===== MAIN CONTENT ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ===== PAGE HEADER ===== */
+.page-header {
+  padding: 14px 18px 0;
+  flex-shrink: 0;
+}
+.page-header-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.page-title { font-size: 16px; font-weight: 700; color: #f1f5f9; }
+
+/* ===== STATS ROW ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.stat-card {
+  background: #0f172a;
+  border: 1px solid #1a2540;
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: all 0.15s;
+}
+.stat-card:hover { border-color: #2d3f5f; }
+.stat-card.accent { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.06); }
+.stat-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: #475569; margin-bottom: 5px; }
+.stat-value { font-size: 22px; font-weight: 800; color: #f1f5f9; line-height: 1; }
+.stat-sub { font-size: 10px; color: #475569; margin-top: 3px; }
+.stat-trend { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 600; color: #32d583; margin-top: 3px; }
+
+/* ===== FILTER BAR ===== */
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 18px 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #1a2540;
+}
+.search-box {
+  flex: 1; height: 32px;
+  background: #0f172a; border: 1px solid #1a2540; border-radius: 8px;
+  display: flex; align-items: center; padding: 0 10px; gap: 6px;
+  font-size: 12px; color: #334155;
+}
+.search-box input {
+  background: none; border: none; outline: none;
+  font-size: 12px; color: #94a3b8; font-family: inherit; flex: 1;
+}
+.filter-chip {
+  height: 32px; padding: 0 12px;
+  background: #0f172a; border: 1px solid #1a2540;
+  border-radius: 8px; font-size: 11px; font-weight: 500;
+  color: #64748b; cursor: pointer; display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s; white-space: nowrap;
+}
+.filter-chip.active { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.35); color: #818cf8; }
+.filter-chip:hover { border-color: #2d3f5f; color: #94a3b8; }
+.chip-count {
+  background: rgba(99,102,241,0.25); color: #818cf8;
+  font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px;
+}
+.add-btn {
+  height: 32px; padding: 0 14px;
+  background: #6366f1; border-radius: 8px;
+  font-size: 12px; font-weight: 600; color: white; border: none;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  flex-shrink: 0; transition: background 0.15s;
+}
+.add-btn:hover { background: #4f46e5; }
+
+/* ===== SKILLS LIST ===== */
+.skills-list {
+  flex: 1; overflow-y: auto; padding: 12px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99,102,241,0.3) transparent;
+}
+.skills-list::-webkit-scrollbar { width: 4px; }
+.skills-list::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 4px; }
+
+/* ===== SKILL CARD ===== */
+.skill-card {
+  background: #0f172a;
+  border: 1px solid #1a2540;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: all 0.18s;
+}
+.skill-card:hover { border-color: #2d3f5f; box-shadow: 0 4px 20px -4px rgba(0,0,0,0.4); }
+.skill-card.expanded { border-color: rgba(99,102,241,0.35); }
+
+.skill-main {
+  padding: 11px 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+}
+.skill-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(129,140,248,0.15));
+  border: 1px solid rgba(99,102,241,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #818cf8; flex-shrink: 0;
+  font-family: 'Fira Code', monospace;
+}
+.skill-info { flex: 1; min-width: 0; }
+.skill-name { font-size: 13px; font-weight: 600; color: #e2e8f0; margin-bottom: 2px; }
+.skill-meta { display: flex; align-items: center; gap: 6px; }
+.skill-source { font-size: 10px; color: #475569; display: flex; align-items: center; gap: 3px; }
+.skill-source-tag {
+  font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 4px;
+  background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);
+}
+.skill-source-tag.local { background: rgba(6,182,212,0.1); color: #06b6d4; border-color: rgba(6,182,212,0.2); }
+.skill-age { font-size: 10px; color: #334155; }
+
+.skill-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tool-avatars { display: flex; gap: 2px; align-items: center; }
+.tool-avatar {
+  width: 20px; height: 20px; border-radius: 5px;
+  background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; color: #818cf8;
+}
+.tool-more { font-size: 9px; color: #475569; margin-left: 2px; }
+.sync-status {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+}
+.sync-status.ok { background: rgba(50,213,131,0.12); color: #32d583; border: 1px solid rgba(50,213,131,0.2); }
+.sync-status.partial { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.skill-chevron { color: #334155; font-size: 10px; transition: transform 0.2s; }
+.skill-card.expanded .skill-chevron { transform: rotate(90deg); }
+
+/* ===== SYNC CONTROL PANEL ===== */
+.sync-panel {
+  border-top: 1px solid #1a2540;
+  padding: 12px 14px;
+  background: rgba(5,10,20,0.5);
+  display: none;
+}
+.skill-card.expanded .sync-panel { display: block; }
+.sync-panel-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: #475569; margin-bottom: 10px; }
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.tool-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 8px;
+  border: 1px solid #1a2540; background: #0a1120;
+  cursor: pointer; transition: all 0.15s;
+}
+.tool-toggle:hover { border-color: #2d3f5f; }
+.tool-toggle.on {
+  background: rgba(99,102,241,0.1);
+  border-color: rgba(99,102,241,0.3);
+}
+.tool-toggle.on .toggle-dot { background: #818cf8; }
+.toggle-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #1e293b; flex-shrink: 0; transition: background 0.15s;
+}
+.tool-toggle-name { font-size: 10px; font-weight: 500; color: #475569; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tool-toggle.on .tool-toggle-name { color: #94a3b8; }
+
+.sync-actions { display: flex; gap: 6px; }
+.sync-action-btn {
+  height: 26px; padding: 0 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  transition: all 0.15s; border: none;
+}
+.btn-sync { background: #6366f1; color: white; }
+.btn-sync:hover { background: #4f46e5; }
+.btn-update { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+.btn-update:hover { background: rgba(99,102,241,0.2); }
+.btn-danger { background: rgba(249,112,102,0.1); color: #f97066; border: 1px solid rgba(249,112,102,0.2); }
+.btn-danger:hover { background: rgba(249,112,102,0.18); }
+
+/* ===== SECTION LABEL ===== */
+.section-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.6px; color: #334155; margin-bottom: 8px; margin-top: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-label::after { content:''; flex:1; height:1px; background:#1a2540; }
+
+/* ANNOTATION */
+.anno {
+  margin-top: 20px;
+  background: #0f172a; border: 1px solid #1a2540; border-radius: 12px;
+  padding: 14px 16px;
+}
+.anno-title { font-size: 13px; font-weight: 700; color: #818cf8; margin-bottom: 10px; }
+.anno-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 7px; font-size: 12px; color: #64748b; line-height: 1.5; }
+.anno-num { width: 20px; height: 20px; border-radius: 50%; background: rgba(99,102,241,0.2); color: #818cf8; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<div class="title">Skillverse — 改版设计稿 V3</div>
+<p class="subtitle">结合：左侧图标导航 · 顶部统计卡 · 筛选栏 · 每技能可展开同步控制</p>
+
+<div class="app-shell">
+
+  <!-- LEFT RAIL -->
+  <div class="rail">
+    <div class="rail-logo"><span class="rail-logo-s">S</span></div>
+    <div class="nav-item active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <div class="tooltip">My Skills</div>
+    </div>
+    <div class="nav-item">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <div class="tooltip">Explore</div>
+    </div>
+    <div class="rail-sep"></div>
+    <div class="nav-item bottom">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <div class="tooltip">Settings</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- PAGE HEADER + STATS -->
+    <div class="page-header">
+      <div class="page-header-row">
+        <div class="page-title">My Skills</div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card accent">
+          <div class="stat-label">Total Skills</div>
+          <div class="stat-value">12</div>
+          <div class="stat-trend">↑ 3 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tools Active</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">of 47 supported</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Synced</div>
+          <div class="stat-value">11</div>
+          <div class="stat-sub">1 partial</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Last Updated</div>
+          <div class="stat-value" style="font-size:14px;margin-top:4px">3m ago</div>
+          <div class="stat-sub">react-best-practices</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <svg width="13" height="13" fill="none" stroke="#334155" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Search skills..." />
+      </div>
+      <div class="filter-chip active">All <span class="chip-count">12</span></div>
+      <div class="filter-chip">Git</div>
+      <div class="filter-chip">Local</div>
+      <div class="filter-chip">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        Sort
+      </div>
+      <button class="add-btn">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Skill
+      </button>
+    </div>
+
+    <!-- SKILLS LIST -->
+    <div class="skills-list">
+      <div class="section-label">Git Skills</div>
+
+      <!-- Skill 1 — expanded -->
+      <div class="skill-card expanded">
+        <div class="skill-main" onclick="toggle(this)">
+          <div class="skill-icon">rp</div>
+          <div class="skill-info">
+            <div class="skill-name">react-best-practices</div>
+            <div class="skill-meta">
+              <span class="skill-source-tag">git</span>
+              <span class="skill-age">3 days ago</span>
+            </div>
+          </div>
+          <div class="skill-right">
+            <div class="tool-avatars">
+              <div class="tool-avatar">C</div>
+              <div class="tool-avatar">Cl</div>
+              <div class="tool-avatar">Cx</div>
+              <span class="tool-more">+4</span>
+            </div>
+            <div class="sync-status ok">
+              <span style="width:6px;height:6px;border-radius:50%;background:#32d583;display:inline-block"></span>
+              synced
+            </div>
+            <span class="skill-chevron">▶</span>
+          </div>
+        </div>
+        <div class="sync-panel">
+          <div class="sync-panel-title">Sync targets — click to toggle</div>
+          <div class="tools-grid">
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Cursor</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Claude</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Codex</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Amp</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">OpenCode</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Gemini CLI</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Windsurf</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Cline</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Roo Code</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Goose</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Copilot</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Trae</span></div>
+          </div>
+          <div class="sync-actions">
+            <button class="sync-action-btn btn-sync">↻ Sync Now</button>
+            <button class="sync-action-btn btn-update">⬆ Update</button>
+            <button class="sync-action-btn btn-danger" style="margin-left:auto">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill 2 — collapsed -->
+      <div class="skill-card">
+        <div class="skill-main" onclick="toggle(this)">
+          <div class="skill-icon">sd</div>
+          <div class="skill-info">
+            <div class="skill-name">systematic-debug</div>
+            <div class="skill-meta">
+              <span class="skill-source-tag">git</span>
+              <span class="skill-age">1 week ago</span>
+            </div>
+          </div>
+          <div class="skill-right">
+            <div class="tool-avatars">
+              <div class="tool-avatar">C</div>
+              <div class="tool-avatar">Cl</div>
+              <span class="tool-more">+5</span>
+            </div>
+            <div class="sync-status ok">
+              <span style="width:6px;height:6px;border-radius:50%;background:#32d583;display:inline-block"></span>
+              synced
+            </div>
+            <span class="skill-chevron">▶</span>
+          </div>
+        </div>
+        <div class="sync-panel">
+          <div class="sync-panel-title">Sync targets</div>
+          <div class="tools-grid">
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Cursor</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Claude</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Codex</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Amp</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">OpenCode</span></div>
+            <div class="tool-toggle on"><div class="toggle-dot"></div><span class="tool-toggle-name">Gemini CLI</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Windsurf</span></div>
+            <div class="tool-toggle"><div class="toggle-dot"></div><span class="tool-toggle-name">Cline</span></div>
+          </div>
+          <div class="sync-actions">
+            <button class="sync-action-btn btn-sync">↻ Sync Now</button>
+            <button class="sync-action-btn btn-update">⬆ Update</button>
+            <button class="sync-action-btn btn-danger" style="margin-left:auto">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skill 3 — partial -->
+      <div class="skill-card">
+        <div class="skill-main" onclick="toggle(this)">
+          <div class="skill-icon" style="background:linear-gradient(135deg,rgba(139,92,246,0.25),rgba(167,139,250,0.15));border-color:rgba(139,92,246,0.25);color:#a78bfa">uu</div>
+          <div class="skill-info">
+            <div class="skill-name">ui-ux-pro-max</div>
+            <div class="skill-meta">
+              <span class="skill-source-tag">git</span>
+              <span class="skill-age">2 days ago</span>
+            </div>
+          </div>
+          <div class="skill-right">
+            <div class="tool-avatars">
+              <div class="tool-avatar" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.25);color:#a78bfa">C</div>
+              <span class="tool-more">+2</span>
+            </div>
+            <div class="sync-status partial">
+              <span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
+              partial
+            </div>
+            <span class="skill-chevron">▶</span>
+          </div>
+        </div>
+        <div class="sync-panel"></div>
+      </div>
+
+      <div class="section-label" style="margin-top:8px">Local Skills</div>
+
+      <!-- Skill 4 local -->
+      <div class="skill-card">
+        <div class="skill-main" onclick="toggle(this)">
+          <div class="skill-icon" style="background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.25);color:#06b6d4">ps</div>
+          <div class="skill-info">
+            <div class="skill-name">pua-skill</div>
+            <div class="skill-meta">
+              <span class="skill-source-tag local">local</span>
+              <span class="skill-age">just now</span>
+            </div>
+          </div>
+          <div class="skill-right">
+            <div class="tool-avatars">
+              <div class="tool-avatar" style="background:rgba(6,182,212,0.12);border-color:rgba(6,182,212,0.25);color:#06b6d4">Cl</div>
+            </div>
+            <div class="sync-status ok">
+              <span style="width:6px;height:6px;border-radius:50%;background:#32d583;display:inline-block"></span>
+              synced
+            </div>
+            <span class="skill-chevron">▶</span>
+          </div>
+        </div>
+        <div class="sync-panel"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ANNOTATIONS -->
+<div class="anno">
+  <div class="anno-title">设计说明</div>
+  <div class="anno-row">
+    <div class="anno-num">1</div>
+    <div><strong style="color:#94a3b8">顶部统计卡：</strong>4 个指标卡（总技能数、激活工具数、同步状态、最近更新），扫一眼知道整体健康状态。</div>
+  </div>
+  <div class="anno-row">
+    <div class="anno-num">2</div>
+    <div><strong style="color:#94a3b8">筛选栏：</strong>搜索 + 快捷过滤（All / Git / Local）+ 排序，操作集中，不跳页。</div>
+  </div>
+  <div class="anno-row">
+    <div class="anno-num">3</div>
+    <div><strong style="color:#94a3b8">技能卡片展开同步控制：</strong>点击任意技能卡片 → 展开同步面板，显示所有工具 toggle + Sync / Update / Remove 操作。点击 <strong>react-best-practices</strong> 的标题行可体验收起/展开。</div>
+  </div>
+  <div class="anno-row">
+    <div class="anno-num">4</div>
+    <div><strong style="color:#94a3b8">左侧图标导航：</strong>常驻 My Skills / Explore / Settings，后续可加更多模块。hover 显示 tooltip。</div>
+  </div>
+</div>
+
+<script>
+function toggle(el) {
+  const card = el.closest('.skill-card');
+  card.classList.toggle('expanded');
+}
+</script>
+</body>
+</html>

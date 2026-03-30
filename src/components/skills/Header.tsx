@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Layers, Search, Settings } from 'lucide-react'
+import { Layers, Languages, Search, Settings } from 'lucide-react'
 import type { TFunction } from 'i18next'
 
 type HeaderProps = {
@@ -21,42 +21,54 @@ const Header = ({
   t,
 }: HeaderProps) => {
   return (
-    <header className="skills-header">
-      <div className="header-left">
-        <div className="brand-area">
-          <img className="logo-icon" src="/logo.png" alt="" />
-          <div className="brand-text-wrap">
-            <div className="brand-text">{t('appName')}</div>
-          </div>
+    <aside className="skills-rail">
+      <div className="rail-top">
+        <div className="rail-logo" aria-label="Skillverse">
+          <img src="/logo.png" alt="" className="rail-logo-img" />
         </div>
-        <nav className="nav-tabs">
+        <nav className="rail-nav">
           <button
-            className={`nav-tab${activeView === 'myskills' || activeView === 'detail' ? ' active' : ''}`}
             type="button"
+            className={`rail-btn${activeView === 'myskills' || activeView === 'detail' ? ' active' : ''}`}
+            title={t('navMySkillsTooltip')}
+            aria-label={t('navMySkillsTooltip')}
             onClick={() => onViewChange('myskills')}
           >
-            <Layers size={16} />
-            {t('navMySkills')}
+            <Layers size={20} />
           </button>
           <button
-            className={`nav-tab${activeView === 'explore' ? ' active' : ''}`}
             type="button"
+            className={`rail-btn${activeView === 'explore' ? ' active' : ''}`}
+            title={t('navExploreTooltip')}
+            aria-label={t('navExploreTooltip')}
             onClick={() => onViewChange('explore')}
           >
-            <Search size={16} />
-            {t('navExplore')}
+            <Search size={20} />
           </button>
         </nav>
       </div>
-      <div className="header-actions">
-        <button className="lang-btn" type="button" onClick={onToggleLanguage}>
-          {language === 'en' ? t('languageShort.en') : t('languageShort.zh')}
+      <div className="rail-bottom">
+        <button
+          type="button"
+          className="rail-btn"
+          title={t('navLanguageTooltip')}
+          aria-label={t('navLanguageTooltip')}
+          onClick={onToggleLanguage}
+        >
+          <Languages size={18} />
+          <span className="rail-lang-badge">{language === 'en' ? 'EN' : '中'}</span>
         </button>
-        <button className={`icon-btn${activeView === 'settings' ? ' active' : ''}`} type="button" onClick={onOpenSettings}>
-          <Settings size={18} />
+        <button
+          type="button"
+          className={`rail-btn${activeView === 'settings' ? ' active' : ''}`}
+          title={t('navSettingsTooltip')}
+          aria-label={t('navSettingsTooltip')}
+          onClick={onOpenSettings}
+        >
+          <Settings size={20} />
         </button>
       </div>
-    </header>
+    </aside>
   )
 }
 

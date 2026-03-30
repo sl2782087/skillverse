@@ -1,12 +1,10 @@
 .skills-app {
-  height: 100%;
-  background: var(--bg-app);
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
   display: flex;
   flex-direction: column;
+  height: 100vh;
   overflow: hidden;
+  background: var(--bg-app);
+  color: var(--text-primary);
 }
 
 .skills-header {
@@ -111,13 +109,21 @@
   gap: 12px;
 }
 
-.skills-main {
+.skills-shell {
+  display: flex;
+  flex-direction: row;
   flex: 1;
   overflow: hidden;
-  background: var(--bg-app);
+  min-height: 0;
+}
+
+.skills-main {
+  flex: 1;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  background: var(--bg-app);
+  min-width: 0;
 }
 
 .dashboard-stack {
@@ -2597,4 +2603,79 @@
 
 .skill-name.clickable:hover {
   color: var(--accent-primary);
+}
+
+/* === Rail === */
+.skills-rail {
+  width: 52px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--bg-rail);
+  border-right: 1px solid var(--border-rail);
+  padding: 12px 0;
+  z-index: 10;
+}
+.rail-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.rail-logo {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.rail-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+.rail-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.rail-btn:hover {
+  background: var(--accent-soft-bg);
+  color: var(--text-primary);
+}
+.rail-btn.active {
+  background: rgba(99, 102, 241, 0.18);
+  color: var(--accent-primary);
+}
+.rail-lang-badge {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+.rail-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skillverse 改版设计方向</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: #070d1a;
+  color: #e2e8f0;
+  padding: 28px 20px 80px;
+  min-height: 100vh;
+}
+.page-title {
+  font-size: 20px; font-weight: 800;
+  background: linear-gradient(135deg, #818cf8, #c4b5fd);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 6px;
+}
+.page-sub { font-size: 12px; color: #475569; margin-bottom: 28px; line-height: 1.6; }
+
+.dir-card {
+  border: 2px solid #1e293b;
+  border-radius: 16px;
+  background: #0f172a;
+  margin-bottom: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dir-card:hover { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+.dir-card.selected { border-color: #818cf8; box-shadow: 0 0 0 4px rgba(129,140,248,0.2); }
+
+.dir-header {
+  padding: 16px 18px 12px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid #1e293b;
+}
+.dir-letter {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; color: white;
+}
+.dir-name { font-size: 15px; font-weight: 700; color: #f1f5f9; }
+.dir-tagline { font-size: 11px; color: #64748b; margin-top: 2px; }
+.selected-badge {
+  margin-left: auto;
+  background: #6366f1; color: white;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+  display: none;
+}
+.dir-card.selected .selected-badge { display: block; }
+
+/* ===== MOCKUP AREA ===== */
+.mockup {
+  margin: 0;
+  background: #060c18;
+  border-bottom: 1px solid #1e293b;
+}
+
+/* Direction A — Left Rail */
+.mock-a {
+  display: flex;
+  height: 280px;
+  font-size: 11px;
+}
+.a-rail {
+  width: 48px;
+  background: #080f1e;
+  border-right: 1px solid #1e293b;
+  display: flex; flex-direction: column;
+  align-items: center; padding: 12px 0; gap: 3px;
+  flex-shrink: 0;
+}
+.a-logo {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  margin-bottom: 16px;
+}
+.a-nav {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #334155; font-size: 15px; transition: all 0.15s;
+}
+.a-nav.active { background: rgba(99,102,241,0.18); color: #818cf8; }
+.a-nav.bottom { margin-top: auto; }
+.a-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.a-topbar {
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e293b;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.a-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+.a-actions { display: flex; gap: 5px; align-items: center; }
+.a-search {
+  height: 24px; width: 130px; background: #111a2b;
+  border: 1px solid #1e293b; border-radius: 20px;
+  display: flex; align-items: center; padding: 0 8px; gap: 4px;
+  color: #334155; font-size: 10px;
+}
+.a-add {
+  height: 24px; padding: 0 10px;
+  background: #6366f1; border-radius: 6px;
+  display: flex; align-items: center; font-size: 10px; font-weight: 600; color: white;
+}
+.a-grid {
+  flex: 1; padding: 10px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+  overflow: hidden;
+}
+.a-tile {
+  background: #111a2b; border: 1px solid #1e293b; border-radius: 9px; padding: 9px;
+}
+.a-tile-name { font-size: 11px; font-weight: 600; color: #cbd5e1; }
+.a-tile-meta { font-size: 9px; color: #334155; margin: 3px 0 6px; }
+.a-tile-dots { display: flex; gap: 2px; align-items: center; margin-bottom: 5px; }
+.a-dot { width: 14px; height: 14px; border-radius: 3px; background: rgba(99,102,241,0.25); border: 1px solid rgba(99,102,241,0.35); }
+.a-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 9px; font-weight: 600;
+  padding: 2px 6px; border-radius: 8px;
+  background: rgba(50,213,131,0.14); color: #32d583;
+}
+.a-tile.featured { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.22); }
+
+/* Direction B — Bento */
+.mock-b {
+  display: flex; flex-direction: column;
+  height: 280px; font-size: 11px;
+}
+.b-topbar {
+  height: 42px; background: #080f1e;
+  border-bottom: 1px solid #1e293b;
+  display: flex; align-items: center; padding: 0 12px; gap: 8px;
+  flex-shrink: 0;
+}
+.b-logo { width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.b-name { font-size: 12px; font-weight: 700; color: #e2e8f0; flex: 1; }
+.b-tabs {
+  display: flex; background: #111a2b; border: 1px solid #1e293b;
+  border-radius: 20px; padding: 2px; gap: 1px;
+}
+.b-tab { font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 14px; color: #475569; }
+.b-tab.active { background: #8b5cf6; color: white; }
+.b-bento {
+  flex: 1; padding: 8px; display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+}
+.b-cell {
+  border-radius: 9px; border: 1px solid #1e293b;
+  background: #111a2b; padding: 9px; overflow: hidden;
+}
+.b-cell.span2 { grid-column: span 2; }
+.b-cell.tall { grid-row: span 2; }
+.b-cell.accent { background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(167,139,250,0.06)); border-color: rgba(139,92,246,0.3); }
+.b-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: #475569; margin-bottom: 5px; }
+.b-val { font-size: 24px; font-weight: 800; color: #f1f5f9; line-height: 1; }
+.b-sub { font-size: 9px; color: #475569; margin-top: 2px; }
+.b-bars { display: flex; gap: 2px; align-items: flex-end; height: 28px; margin-top: 7px; }
+.b-bar { flex: 1; border-radius: 2px; background: rgba(139,92,246,0.25); }
+.b-bar.hi { background: #8b5cf6; }
+.b-chips { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 5px; }
+.b-chip { font-size: 9px; font-weight: 500; padding: 2px 5px; border-radius: 4px; background: rgba(139,92,246,0.14); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+.b-chip.off { background: #111a2b; color: #334155; border-color: #1e293b; }
+.b-skill { display: flex; align-items: center; gap: 5px; padding: 4px 0; border-bottom: 1px solid #1e293b; }
+.b-skill:last-child { border-bottom: none; }
+.b-sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.b-sname { flex: 1; font-size: 10px; color: #94a3b8; }
+.b-scnt { font-size: 9px; color: #475569; }
+
+/* Direction C — Editorial */
+.mock-c {
+  display: flex; flex-direction: column;
+  height: 280px; font-size: 11px;
+  background: #f8fafc;
+}
+.c-bar {
+  height: 44px; background: white; border-bottom: 1px solid #e2e8f0;
+  display: flex; align-items: center; padding: 0 12px; gap: 8px;
+  flex-shrink: 0;
+}
+.c-logo { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, #0891b2, #06b6d4); }
+.c-name { font-size: 12px; font-weight: 800; color: #0f172a; flex: 1; }
+.c-nav { display: flex; }
+.c-ntab { font-size: 11px; font-weight: 500; padding: 5px 10px; color: #94a3b8; border-bottom: 2px solid transparent; }
+.c-ntab.active { color: #0891b2; border-bottom-color: #0891b2; }
+.c-btn { height: 24px; padding: 0 10px; background: #0891b2; border-radius: 6px; font-size: 10px; font-weight: 600; color: white; border: none; display: flex; align-items: center; }
+.c-main { flex: 1; display: flex; overflow: hidden; }
+.c-table { flex: 1; overflow: hidden; }
+.c-thead {
+  display: grid; grid-template-columns: 1.6fr 0.7fr 1.4fr 70px;
+  padding: 6px 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8;
+}
+.c-trow {
+  display: grid; grid-template-columns: 1.6fr 0.7fr 1.4fr 70px;
+  padding: 8px 12px; border-bottom: 1px solid #f1f5f9;
+  align-items: center; background: white; transition: background 0.1s;
+}
+.c-trow:hover { background: #fafafa; }
+.c-rname { font-size: 11px; font-weight: 600; color: #0f172a; }
+.c-rsub { font-size: 9px; color: #94a3b8; margin-top: 1px; }
+.c-rsource { font-size: 10px; color: #64748b; }
+.c-rtools { display: flex; gap: 2px; flex-wrap: wrap; }
+.c-rtchip { font-size: 9px; padding: 1px 4px; border-radius: 3px; background: #e0f2fe; color: #0891b2; font-weight: 500; }
+.c-status { font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 8px; display: inline-block; }
+.c-status.ok { background: #dcfce7; color: #16a34a; }
+.c-status.warn { background: #fef9c3; color: #ca8a04; }
+.c-panel {
+  width: 140px; border-left: 1px solid #e2e8f0; background: white;
+  padding: 10px;
+}
+.c-plabel { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 6px; }
+.c-pstat { text-align: center; padding: 7px; background: #f0f9ff; border-radius: 7px; margin-bottom: 8px; }
+.c-pval { font-size: 22px; font-weight: 800; color: #0891b2; }
+.c-psub { font-size: 9px; color: #94a3b8; }
+.c-ptool { font-size: 10px; color: #64748b; padding: 3px 0; border-bottom: 1px solid #f1f5f9; display: flex; gap: 4px; align-items: center; }
+.c-gdot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; flex-shrink: 0; }
+
+/* Tags */
+.dir-tags {
+  padding: 12px 16px;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.dtag {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 9px; border-radius: 20px;
+  border: 1px solid #1e293b; color: #475569;
+}
+.dtag.hi { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); color: #818cf8; }
+.dir-b .dtag.hi { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: #a78bfa; }
+.dir-c .dtag.hi { background: rgba(8,145,178,0.1); border-color: rgba(8,145,178,0.3); color: #0891b2; }
+
+.footer {
+  text-align: center; font-size: 12px; color: #475569;
+  padding: 8px 0; line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">Skillverse 改版设计方向</div>
+<p class="page-sub">三个完全不同的视觉语言。功能不变，体验全新。<br>点击方向卡片选择你喜欢的。</p>
+
+<!-- DIRECTION A -->
+<div class="dir-card dir-a" onclick="pick('A',this)">
+  <div class="dir-header">
+    <div class="dir-letter" style="background:linear-gradient(135deg,#6366f1,#818cf8)">A</div>
+    <div>
+      <div class="dir-name">Command Center</div>
+      <div class="dir-tagline">图标侧边栏 · 全宽工作区 · 深色极简</div>
+    </div>
+    <div class="selected-badge">✓ 已选</div>
+  </div>
+  <div class="mockup">
+    <div class="mock-a">
+      <div class="a-rail">
+        <div class="a-logo"></div>
+        <div class="a-nav active">▤</div>
+        <div class="a-nav">◎</div>
+        <div class="a-nav bottom">⚙</div>
+      </div>
+      <div class="a-main">
+        <div class="a-topbar">
+          <div class="a-title">My Skills</div>
+          <div class="a-actions">
+            <div class="a-search">⌕ Search...</div>
+            <div class="a-add">+ New</div>
+          </div>
+        </div>
+        <div class="a-grid">
+          <div class="a-tile">
+            <div class="a-tile-name">react-best-practices</div>
+            <div class="a-tile-meta">git · 3 days ago</div>
+            <div class="a-tile-dots">
+              <div class="a-dot"></div><div class="a-dot"></div><div class="a-dot"></div>
+              <span style="font-size:9px;color:#334155;margin-left:2px">+4</span>
+            </div>
+            <div class="a-badge">● synced</div>
+          </div>
+          <div class="a-tile featured">
+            <div class="a-tile-name">systematic-debug</div>
+            <div class="a-tile-meta">git · 1 week ago</div>
+            <div class="a-tile-dots">
+              <div class="a-dot"></div><div class="a-dot"></div>
+              <span style="font-size:9px;color:#334155;margin-left:2px">+6</span>
+            </div>
+            <div class="a-badge">● synced</div>
+          </div>
+          <div class="a-tile">
+            <div class="a-tile-name">ui-ux-pro-max</div>
+            <div class="a-tile-meta">git · 2 days ago</div>
+            <div class="a-tile-dots">
+              <div class="a-dot"></div><div class="a-dot"></div><div class="a-dot"></div>
+            </div>
+            <div class="a-badge">● synced</div>
+          </div>
+          <div class="a-tile">
+            <div class="a-tile-name">pua-skill</div>
+            <div class="a-tile-meta">local · just now</div>
+            <div class="a-tile-dots"><div class="a-dot"></div></div>
+            <div class="a-badge">● synced</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dir-tags">
+    <span class="dtag hi">图标侧边栏</span>
+    <span class="dtag hi">卡片网格</span>
+    <span class="dtag">深色主题</span>
+    <span class="dtag">全宽内容</span>
+    <span class="dtag">极简克制</span>
+  </div>
+</div>
+
+<!-- DIRECTION B -->
+<div class="dir-card dir-b" onclick="pick('B',this)">
+  <div class="dir-header">
+    <div class="dir-letter" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)">B</div>
+    <div>
+      <div class="dir-name">Platform Dashboard</div>
+      <div class="dir-tagline">Bento 网格 · 数据看板 · 平台感</div>
+    </div>
+    <div class="selected-badge">✓ 已选</div>
+  </div>
+  <div class="mockup">
+    <div class="mock-b">
+      <div class="b-topbar">
+        <div class="b-logo"></div>
+        <span class="b-name">Skillverse</span>
+        <div class="b-tabs">
+          <span class="b-tab active">Skills</span>
+          <span class="b-tab">Explore</span>
+        </div>
+        <div style="margin-left:8px;display:flex;gap:4px">
+          <div style="height:22px;padding:0 8px;background:#8b5cf6;border-radius:5px;font-size:9px;font-weight:600;color:white;display:flex;align-items:center">+ Add</div>
+          <div style="width:22px;height:22px;border-radius:5px;background:#111a2b;border:1px solid #1e293b;display:flex;align-items:center;justify-content:center;font-size:10px;color:#475569">⚙</div>
+        </div>
+      </div>
+      <div class="b-bento">
+        <div class="b-cell accent">
+          <div class="b-label">Total Skills</div>
+          <div class="b-val">12</div>
+          <div class="b-sub">↑ 3 this week</div>
+          <div class="b-bars">
+            <div class="b-bar" style="height:30%"></div>
+            <div class="b-bar hi" style="height:55%"></div>
+            <div class="b-bar" style="height:40%"></div>
+            <div class="b-bar hi" style="height:80%"></div>
+            <div class="b-bar" style="height:60%"></div>
+            <div class="b-bar hi" style="height:100%"></div>
+          </div>
+        </div>
+        <div class="b-cell">
+          <div class="b-label">Tools</div>
+          <div class="b-val">8</div>
+          <div class="b-sub">active</div>
+        </div>
+        <div class="b-cell tall">
+          <div class="b-label">Synced To</div>
+          <div class="b-chips">
+            <span class="b-chip">Cursor</span>
+            <span class="b-chip">Claude</span>
+            <span class="b-chip">Codex</span>
+            <span class="b-chip">Amp</span>
+            <span class="b-chip off">Cline</span>
+            <span class="b-chip off">Roo</span>
+          </div>
+        </div>
+        <div class="b-cell span2">
+          <div class="b-label">Recent</div>
+          <div class="b-skill"><div class="b-sdot" style="background:#8b5cf6"></div><span class="b-sname">react-best-practices</span><span class="b-scnt">7 tools</span></div>
+          <div class="b-skill"><div class="b-sdot" style="background:#06b6d4"></div><span class="b-sname">systematic-debug</span><span class="b-scnt">5 tools</span></div>
+          <div class="b-skill"><div class="b-sdot" style="background:#f59e0b"></div><span class="b-sname">ui-ux-pro-max</span><span class="b-scnt">3 tools</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dir-tags">
+    <span class="dtag hi">Bento 网格</span>
+    <span class="dtag hi">数字指标</span>
+    <span class="dtag">紫色主调</span>
+    <span class="dtag">胶囊导航</span>
+    <span class="dtag">平台质感</span>
+  </div>
+</div>
+
+<!-- DIRECTION C -->
+<div class="dir-card dir-c" onclick="pick('C',this)">
+  <div class="dir-header">
+    <div class="dir-letter" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">C</div>
+    <div>
+      <div class="dir-name">Editorial Pro</div>
+      <div class="dir-tagline">表格视图 · 右侧面板 · 专业工具感</div>
+    </div>
+    <div class="selected-badge">✓ 已选</div>
+  </div>
+  <div class="mockup">
+    <div class="mock-c">
+      <div class="c-bar">
+        <div class="c-logo"></div>
+        <span class="c-name">Skillverse</span>
+        <div class="c-nav">
+          <div class="c-ntab active">My Skills</div>
+          <div class="c-ntab">Explore</div>
+        </div>
+        <button class="c-btn">+ New Skill</button>
+        <div style="width:22px;height:22px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#64748b">⚙</div>
+      </div>
+      <div class="c-main">
+        <div class="c-table">
+          <div class="c-thead">
+            <span>Skill</span><span>Source</span><span>Tools</span><span>Status</span>
+          </div>
+          <div class="c-trow">
+            <div><div class="c-rname">react-best-practices</div><div class="c-rsub">3 days ago</div></div>
+            <div class="c-rsource">git</div>
+            <div class="c-rtools"><span class="c-rtchip">Cursor</span><span class="c-rtchip">Claude</span><span class="c-rtchip">+5</span></div>
+            <div><span class="c-status ok">synced</span></div>
+          </div>
+          <div class="c-trow">
+            <div><div class="c-rname">systematic-debug</div><div class="c-rsub">1 week ago</div></div>
+            <div class="c-rsource">git</div>
+            <div class="c-rtools"><span class="c-rtchip">Cursor</span><span class="c-rtchip">Codex</span><span class="c-rtchip">+3</span></div>
+            <div><span class="c-status ok">synced</span></div>
+          </div>
+          <div class="c-trow">
+            <div><div class="c-rname">ui-ux-pro-max</div><div class="c-rsub">2 days ago</div></div>
+            <div class="c-rsource">git</div>
+            <div class="c-rtools"><span class="c-rtchip">Cursor</span><span class="c-rtchip">+2</span></div>
+            <div><span class="c-status warn">partial</span></div>
+          </div>
+          <div class="c-trow">
+            <div><div class="c-rname">pua-skill</div><div class="c-rsub">just now</div></div>
+            <div class="c-rsource">local</div>
+            <div class="c-rtools"><span class="c-rtchip">Claude</span></div>
+            <div><span class="c-status ok">synced</span></div>
+          </div>
+        </div>
+        <div class="c-panel">
+          <div class="c-plabel">Overview</div>
+          <div class="c-pstat"><div class="c-pval">12</div><div class="c-psub">skills</div></div>
+          <div class="c-plabel">Tools</div>
+          <div class="c-ptool"><div class="c-gdot"></div>Cursor</div>
+          <div class="c-ptool"><div class="c-gdot"></div>Claude Code</div>
+          <div class="c-ptool"><div class="c-gdot"></div>Codex</div>
+          <div class="c-ptool" style="color:#94a3b8"><div class="c-gdot" style="background:#e2e8f0"></div>Goose</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dir-tags">
+    <span class="dtag hi">表格视图</span>
+    <span class="dtag hi">右侧面板</span>
+    <span class="dtag">浅色主题</span>
+    <span class="dtag">高信息密度</span>
+    <span class="dtag">专业工具感</span>
+  </div>
+</div>
+
+<div class="footer">点击选择方向，或告诉我想混合哪些元素 ↑</div>
+
+<script>
+function pick(letter, el) {
+  document.querySelectorAll('.dir-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.querySelector('.footer').textContent = '✓ 已选方向 ' + letter + ' — 告诉我你的想法或说「继续」';
+}
+</script>
+</body>
+</html>

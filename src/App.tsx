@@ -1854,6 +1854,7 @@ function App() {
         t={t}
       />
 
+      <div className="skills-shell">
       <Header
         language={language}
         loading={loading}
@@ -1936,6 +1937,7 @@ function App() {
           />
         )}
       </main>
+      </div>
 
       <AddSkillModal
         open={showAddModal}
