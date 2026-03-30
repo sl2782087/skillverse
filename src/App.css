@@ -7,108 +7,6 @@
   color: var(--text-primary);
 }
 
-.skills-header {
-  height: 56px;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-header);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 1px 0 color-mix(in oklab, var(--accent-primary) 18%, transparent);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  height: 100%;
-}
-
-.brand-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Navigation Tabs */
-.nav-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 100%;
-}
-
-.nav-tab {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  border: none;
-  background: none;
-  position: relative;
-  transition: color var(--motion-base);
-  font-family: inherit;
-}
-
-.nav-tab:hover {
-  color: var(--text-secondary);
-}
-
-.nav-tab.active {
-  color: var(--accent-primary);
-  font-weight: 600;
-}
-
-.nav-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 8px;
-  right: 8px;
-  height: 2px;
-  background: var(--accent-primary);
-  border-radius: 2px 2px 0 0;
-}
-
-.logo-icon {
-  width: 36px;
-  height: 36px;
-  display: block;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.brand-text-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.brand-text {
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: -0.03em;
-  color: var(--accent-primary);
-}
-
-.brand-subtitle {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .skills-shell {
   display: flex;
   flex-direction: row;
@@ -119,7 +17,7 @@
 
 .skills-main {
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--bg-app);
@@ -132,33 +30,6 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
-}
-
-.filter-bar {
-  padding: 20px 32px 14px 32px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--accent-soft-bg) 40%, var(--bg-app) 60%) 0%,
-    var(--bg-app) 100%
-  );
-}
-
-.filter-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
-}
-
-.filter-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .sort-btn {
@@ -233,17 +104,6 @@
   font-size: 13px;
 }
 
-
-.skills-list {
-  padding: 18px 32px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-}
-
 .discovered-banner {
   display: flex;
   align-items: center;
@@ -287,173 +147,6 @@
   color: var(--text-secondary);
 }
 
-.skill-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 20px;
-  align-items: center;
-  transition: all var(--motion-base);
-  position: relative;
-  box-shadow: var(--shadow-sm);
-}
-
-.skill-card:hover {
-  border-color: var(--accent-soft-border);
-  background: var(--bg-panel);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-  z-index: 1;
-}
-
-.skill-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--bg-element);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 20px;
-  transition: all var(--motion-base);
-}
-
-.skill-card:hover .skill-icon {
-  color: var(--text-primary);
-  border-color: var(--border-strong);
-  background: var(--bg-panel);
-}
-
-.skill-main {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  justify-content: center;
-}
-
-.skill-header-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.skill-github-open {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  border-radius: 6px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.skill-github-open:hover {
-  color: var(--text-primary);
-  background: var(--surface-hover);
-}
-
-.skill-name {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  max-width: 100%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.skill-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-top: 2px;
-}
-
-.skill-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-.skill-source {
-  font-family: var(--font-ui);
-  font-size: 12px;
-  color: var(--text-tertiary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.skill-source.time {
-  white-space: nowrap;
-}
-
-.repo-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 320px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--text-secondary);
-  font-weight: 500;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-element);
-  transition: all var(--motion-base);
-}
-
-.repo-pill.copyable {
-  cursor: pointer;
-}
-
-.repo-pill.copyable:hover {
-  color: var(--text-primary);
-  border-color: var(--border-strong);
-  background: var(--accent-soft-bg);
-}
-
-.repo-pill:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.repo-pill .copy-icon {
-  display: inline-flex;
-  align-items: center;
-  opacity: 0;
-  transform: translateX(-2px);
-  transition: all 0.2s;
-  color: var(--text-tertiary);
-}
-
-.repo-pill.copyable:hover .copy-icon {
-  opacity: 1;
-  transform: translateX(0);
-  color: var(--text-secondary);
-}
-
-.dot {
-  color: var(--text-tertiary);
-}
-
 .tool-matrix {
   display: flex;
   align-items: center;
@@ -465,67 +158,6 @@
 .tool-matrix.collapsed {
   flex-wrap: nowrap;
   overflow: hidden;
-}
-
-.tool-pill {
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all var(--motion-base);
-  border: 1px solid var(--border-subtle);
-  font-family: var(--font-ui);
-  background: var(--bg-panel);
-  color: var(--text-secondary);
-}
-
-.tool-pill.active {
-  background: color-mix(in oklab, var(--accent-soft-bg) 55%, var(--bg-panel) 45%);
-  color: var(--accent-primary);
-  border-color: var(--accent-soft-border);
-}
-
-.tool-pill.active:hover {
-  border-color: var(--accent-primary);
-  transform: translateY(-1px);
-}
-
-.tool-pill.inactive {
-  background: var(--bg-element);
-  color: var(--text-tertiary);
-  border-color: transparent;
-}
-
-.tool-pill.inactive:hover {
-  color: var(--text-secondary);
-  background: var(--bg-element-hover);
-}
-
-.tool-pill.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border: 1px dashed var(--border-strong);
-  background: transparent;
-  color: var(--text-tertiary);
-}
-
-.tool-pill.more-badge {
-  background: var(--bg-element);
-  color: var(--text-tertiary);
-  border: 1px solid var(--border-subtle);
-  font-size: 11px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.tool-pill.more-badge:hover {
-  background: var(--bg-element-hover);
-  color: var(--text-secondary);
 }
 
 .tool-pill-toggle {
@@ -563,55 +195,6 @@
   border-radius: 50%;
   background: var(--accent-secondary);
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent-secondary) 25%, transparent);
-}
-
-.skill-actions-col {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-  align-self: center;
-}
-
-.card-btn {
-  height: 32px;
-  width: 32px;
-  padding: 0;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-tertiary);
-  border: 1px solid transparent;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--motion-base);
-}
-
-.card-btn:hover {
-  color: var(--text-primary);
-  background: var(--bg-element);
-  border-color: var(--border-subtle);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-btn.primary-action {
-  color: var(--accent-primary-fg);
-  background: var(--accent-primary);
-  border-color: transparent;
-}
-
-.card-btn.primary-action:hover {
-  background: var(--accent-primary-hover);
-  color: var(--accent-primary-fg);
-  border-color: transparent;
-}
-
-.card-btn.danger-action:hover {
-  color: var(--status-error);
-  background: var(--danger-soft-bg);
-  border-color: var(--danger-soft-border);
 }
 
 .empty {
@@ -704,9 +287,7 @@
 }
 
 .btn:disabled,
-.icon-btn:disabled,
-.lang-btn:disabled,
-.card-btn:disabled {
+.icon-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -729,32 +310,6 @@
   background: var(--bg-element);
   color: var(--text-primary);
   transform: translateY(-1px);
-}
-
-.lang-btn {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  font-family: var(--font-mono);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.lang-btn:hover {
-  color: var(--text-primary);
-  background: var(--accent-soft-bg);
-  border-color: var(--accent-soft-border);
-}
-
-.header-repo-btn {
-  font-family: var(--font-ui);
-  font-weight: 500;
 }
 
 .modal-backdrop {
@@ -2585,25 +2140,6 @@
   border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-}
-
-/* ── Clickable skill name in card ── */
-.skill-name.clickable {
-  cursor: pointer;
-  transition: color 0.15s;
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
-  text-align: left;
-}
-
-.skill-name.clickable:hover {
-  color: var(--accent-primary);
 }
 
 /* === Rail === */

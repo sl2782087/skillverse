@@ -1823,7 +1823,8 @@ function App() {
   )
 
   const handleSyncNow = useCallback(
-    (_skill: ManagedSkill) => {
+    (skill: ManagedSkill) => {
+      void skill
       void handleSyncAllManagedToTools(
         installedTools.filter((t) => syncTargets[t.id]).map((t) => t.id),
       )
