@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState, useRef, useEffect } from 'react'
 import { MessageCircle } from 'lucide-react'
 import type { TFunction } from 'i18next'
 import type { ManagedSkill, OnboardingPlan, ToolOption, ToolStatusDto } from './types'
@@ -69,6 +69,29 @@ const SkillsList = ({
     return sorted[0] ?? null
   }, [managedSkills])
 
+  const [showToolsDetail, setShowToolsDetail] = useState(false)
+  const toolsCardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showToolsDetail) return
+    const handleClick = (e: MouseEvent) => {
+      if (toolsCardRef.current && !toolsCardRef.current.contains(e.target as Node)) {
+        setShowToolsDetail(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showToolsDetail])
+
+  const installedToolList = useMemo(
+    () => toolStatus?.tools.filter((t) => t.installed) ?? [],
+    [toolStatus],
+  )
+  const notInstalledToolList = useMemo(
+    () => toolStatus?.tools.filter((t) => !t.installed) ?? [],
+    [toolStatus],
+  )
+
   const gitSkills = useMemo(
     () => visibleSkills.filter((s) => s.source_type.toLowerCase().includes('git')),
     [visibleSkills],
@@ -116,10 +139,62 @@ const SkillsList = ({
           <div className="stat-value">{totalSkills}</div>
           <div className="stat-label">{t('statsTotal')}</div>
         </div>
-        <div className="stat-card">
-          <div className="stat-value">{activeToolCount}</div>
-          <div className="stat-label">{t('statsToolsActive')}</div>
-          <div className="stat-sub">{t('statsOf', { total: totalToolCount })}</div>
+        <div className="stat-card-wrapper" ref={toolsCardRef}>
+          <div
+            className="stat-card interactive"
+            role="button"
+            tabIndex={0}
+            aria-expanded={showToolsDetail}
+            onClick={() => setShowToolsDetail((v) => !v)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setShowToolsDetail((v) => !v)
+              }
+            }}
+          >
+            <div className="stat-value">{activeToolCount}</div>
+            <div className="stat-label">{t('statsToolsActive')}</div>
+            <div className="stat-sub">{t('statsOf', { total: totalToolCount })}</div>
+          </div>
+          {showToolsDetail && (
+            <div className="tools-detail-popup">
+              <div className="tools-detail-header">{t('toolsDetailTitle')}</div>
+              {installedToolList.length > 0 && (
+                <>
+                  <div className="tools-detail-section-label">
+                    {t('toolsDetailInstalled')} ({installedToolList.length})
+                  </div>
+                  <div className="tools-detail-list">
+                    {installedToolList.map((tool) => (
+                      <div key={tool.key} className="tools-detail-item">
+                        <span className="tools-detail-dot on" />
+                        {tool.label}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {installedToolList.length > 0 && notInstalledToolList.length > 0 && (
+                <hr className="tools-detail-divider" />
+              )}
+              {notInstalledToolList.length > 0 && (
+                <>
+                  <div className="tools-detail-section-label">
+                    {t('toolsDetailNotInstalled')} ({notInstalledToolList.length})
+                  </div>
+                  <div className="tools-detail-list">
+                    {notInstalledToolList.map((tool) => (
+                      <div key={tool.key} className="tools-detail-item">
+                        <span className="tools-detail-dot off" />
+                        {tool.label}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
         <div className="stat-card">
           <div className="stat-value">{syncedCount}</div>
